@@ -1,0 +1,22 @@
+# Product Context
+
+- **Problema que resolve**: Padaria pequena mas completa opera com cadernos, memória e improviso. Estoque descontrolado, fiado em caderninho, vales sem registro, manutenção esquecida, delivery sem visão de lucro.
+- **Usuários/personas**:
+  - Dono/gerente: visão geral, relatórios, decisões, fiado, vales
+  - Atendente: registro de pedidos (balcão, mesa, viagem)
+  - Caixa: pagamentos, fechamento, sangrias
+  - Chapeiro/cozinha: fila de preparo
+- **Jornada/fluxos críticos**:
+  - Pedido → Preparo → Entrega → Pagamento
+  - Entrada de mercadoria → Estoque → Consumo/Venda → Alerta de falta
+  - Fiado: venda → débito → pagamento parcial/total → histórico
+  - Caixa: abertura → operações → sangrias/vales → fechamento
+- **Regras de negócio**:
+  - Todo valor que definir, mudar fluxo ou condição deve ser PARAMETRIZADO.
+  - Fiado: acesso restrito (dono/gerente/caixa de confiança).
+  - Vale: registrar no ato (valor, funcionário, data, motivo, quem lançou).
+  - Fechamento de caixa: apurado × real.
+- **Critérios de sucesso**:
+  - Reduzir falhas operacionais e desperdício
+  - Substituir cadernos por registros digitais confiáveis
+  - Interface usável por pessoas sem experiência com computador

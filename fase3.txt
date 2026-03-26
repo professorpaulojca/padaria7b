@@ -1,0 +1,16 @@
+Atue apenas na Fase 3 do fluxo.
+
+Objetivo:
+- Definir decisões técnicas alinhadas à SPEC
+- Considerar React, Java e Postgresql
+- Criar todos os protótipos de telas, usando UX/UI senior, telas modernas e fáceis de usar, poucos campos de preenchimento textual, usar muitos cliques em icones.
+
+Restrições:
+- Não gerar TASKS
+- Não gerar código
+
+Entregável:
+- specs/00X-<fluxo>/plan.md
+
+Entregável 2:
+- Apresentação HTML, CSS, Java Script animada, responsiva e com movimento, passando a senssação de uma aplicação funcional, seja detalhista e rigoroso.

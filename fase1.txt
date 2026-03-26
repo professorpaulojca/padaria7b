@@ -1,0 +1,14 @@
+Atue apenas na Fase 1 do fluxo.
+
+Objetivo:
+- Ler documentos em /docs/requisitos/00-originais
+- Normalizar para Markdown em /docs/requisitos/01-normalizados
+
+Restrições:
+- Não gerar SPEC
+- Não gerar código
+- Não resolver conflitos
+
+Entregáveis:
+- Um arquivo MD por documento
+- Lista de conflitos e dúvidas explícitas

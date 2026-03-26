@@ -1,0 +1,12 @@
+Atue apenas na Fase 2 do fluxo.
+
+Objetivo:
+- Gerar SPEC de um único fluxo crítico
+- Basear-se somente nos arquivos normalizados e no mapa-mestre
+
+Restrições:
+- Não gerar código
+- Não gerar PLAN nem TASKS
+
+Entregável:
+- specs/00X-<fluxo>/spec.md

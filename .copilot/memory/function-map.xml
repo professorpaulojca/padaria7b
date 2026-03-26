@@ -1,0 +1,17 @@
+<!-- FunctionMap extraído e compactado do prompt original.
+     Este arquivo descreve funções por fase (Initialization, Planning, Implementation, Documentation, Evaluation, Learning, TaskLog, ErrorHandling, etc.)
+     e workflows que as encadeiam. -->
+
+<FunctionMap>
+  <StructureFunctions>
+    <Function id="createProjectBrief">Create the foundational project brief document</Function>
+    <Function id="createProductContext">Document why the project exists and problems it solves</Function>
+    <Function id="createSystemPatterns">Document system architecture and design patterns</Function>
+    <Function id="createTechContext">Document technologies, setup and dependencies</Function>
+    <Function id="createActiveContext">Document current work focus and next steps</Function>
+    <Function id="createProgressDoc">Document what works and what's left to build</Function>
+  </StructureFunctions>
+  <!-- Demais funções e workflows seguem o mesmo padrão do prompt original,
+       agrupadas por fase: Initialization, Planning, Implementation, Documentation,
+       Evaluation, Learning, TaskLogManagement e ErrorHandling. -->
+</FunctionMap>
