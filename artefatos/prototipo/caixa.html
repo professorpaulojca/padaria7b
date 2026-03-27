@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padaria — Caixa e Pagamentos</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#E8722A;--primary-dark:#C45D1E;--primary-light:#FCEEE4;
+  --secondary:#2D6A4F;--secondary-light:#D8F3DC;
+  --accent:#3A86FF;--accent-light:#E8F0FE;
+  --danger:#E63946;--danger-light:#FFE0E3;
+  --warning:#F4A261;--warning-light:#FFF3E0;
+  --success:#2D6A4F;--success-light:#D8F3DC;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;
+  --gray-800:#1F2937;--gray-900:#111827;
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;--radius-xl:20px;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+  --shadow-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);
+  --transition:.2s ease;
+  --font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--font);background:var(--gray-100);color:var(--gray-800);line-height:1.5;overflow-x:hidden}
+.app{display:flex;min-height:100vh}
+.sidebar{width:72px;background:var(--gray-900);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:0}
+.sidebar-logo{width:44px;height:44px;background:var(--primary);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;cursor:pointer}
+.sidebar-divider{width:36px;height:1px;background:var(--gray-700);margin:6px 0;flex-shrink:0}
+.sidebar-item{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gray-400);cursor:pointer;transition:all var(--transition);position:relative;flex-shrink:0}
+.sidebar-item:hover{background:var(--gray-700);color:#fff}
+.sidebar-item.active{background:var(--primary);color:#fff}
+.sidebar-item .tooltip{position:absolute;left:60px;background:var(--gray-800);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--transition);z-index:200}
+.sidebar-item:hover .tooltip{opacity:1}
+.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px;align-items:center;padding-top:8px}
+.main{margin-left:72px;flex:1;display:flex;flex-direction:column}
+.header{background:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:16px}
+.header-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+.header-subtitle{font-size:13px;color:var(--gray-500)}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-badge{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.badge-open{background:var(--success-light);color:var(--success)}
+.badge-closed{background:var(--danger-light);color:var(--danger)}
+.header-user{width:36px;height:36px;border-radius:50%;background:var(--secondary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer}
+.content{padding:24px;flex:1}
+.hidden{display:none !important}
+
+/* TABS */
+.tabs-bar{display:flex;gap:4px;background:#fff;padding:4px;border-radius:var(--radius);margin-bottom:20px;box-shadow:var(--shadow)}
+.tab-btn{flex:1;padding:12px 16px;border:none;border-radius:var(--radius-sm);background:transparent;font-size:14px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all var(--transition);font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px}
+.tab-btn:hover{background:var(--gray-100);color:var(--gray-700)}
+.tab-btn.active{background:var(--primary);color:#fff;box-shadow:var(--shadow-md)}
+
+/* STATUS BAR */
+.caixa-status-bar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:all .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px}
+.stat-value{font-size:22px;font-weight:800;color:var(--gray-900)}
+.stat-label{font-size:12px;color:var(--gray-500)}
+
+/* ABERTURA CAIXA */
+.caixa-abertura{max-width:600px;margin:40px auto;text-align:center}
+.caixa-abertura-icon{font-size:80px;margin-bottom:16px;display:block}
+.caixa-abertura h2{font-size:24px;font-weight:800;margin-bottom:8px}
+.caixa-abertura p{color:var(--gray-500);margin-bottom:32px}
+.form-group{text-align:left;margin-bottom:20px}
+.form-group label{display:block;font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+.form-input{width:100%;padding:14px 16px;border:2px solid var(--gray-200);border-radius:var(--radius);font-size:16px;font-family:var(--font);outline:none;transition:border var(--transition)}
+.form-input:focus{border-color:var(--primary)}
+.form-input-money{font-size:28px;font-weight:800;text-align:center;padding:20px;color:var(--primary)}
+
+/* PAYMENT LAYOUT */
+.payment-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+.payment-queue{display:flex;flex-direction:column;gap:10px}
+
+/* PEDIDO PARA PAGAMENTO */
+.pedido-pay-card{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.pedido-pay-card:hover{border-color:var(--accent);transform:translateX(4px)}
+.pedido-pay-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.pedido-pay-num{font-weight:800;font-size:18px}
+.pedido-pay-info{flex:1}
+.pedido-pay-mod{font-size:12px;padding:2px 8px;border-radius:10px;font-weight:700}
+.pedido-pay-itens{font-size:13px;color:var(--gray-500);margin-top:2px}
+.pedido-pay-total{font-size:18px;font-weight:800;color:var(--primary)}
+
+/* PAYMENT PANEL */
+.pay-panel{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--gray-200);box-shadow:var(--shadow-md);position:sticky;top:80px;overflow:hidden}
+.pay-header{padding:16px 20px;border-bottom:1px solid var(--gray-200);background:var(--gray-50)}
+.pay-header h3{font-size:16px;font-weight:700}
+.pay-body{padding:20px}
+.pay-total-display{text-align:center;padding:20px;margin-bottom:20px;background:var(--gray-50);border-radius:var(--radius)}
+.pay-total-label{font-size:13px;color:var(--gray-500);margin-bottom:4px}
+.pay-total-value{font-size:36px;font-weight:800;color:var(--primary)}
+.pay-methods-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.pay-method{padding:16px;border:2px solid var(--gray-200);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all .2s;background:#fff}
+.pay-method:hover{border-color:var(--primary);background:var(--primary-light)}
+.pay-method.selected{border-color:var(--primary);background:var(--primary-light)}
+.pay-method-icon{font-size:28px;display:block;margin-bottom:4px}
+.pay-method-label{font-size:13px;font-weight:600}
+.pay-split-section{margin-bottom:16px}
+.pay-split-title{font-size:13px;font-weight:700;color:var(--gray-600);margin-bottom:8px}
+.pay-split-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:10px;background:var(--gray-50);border-radius:var(--radius-sm)}
+.pay-split-row .pay-split-method{flex:1;font-size:14px;font-weight:600}
+.pay-split-row input{width:120px;padding:8px;border:1px solid var(--gray-200);border-radius:6px;font-size:14px;text-align:right;font-family:var(--font)}
+.pay-split-add{font-size:13px;color:var(--accent);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:4px}
+.pay-troco{padding:12px;background:var(--warning-light);border-radius:var(--radius-sm);margin-bottom:16px;display:flex;justify-content:space-between;font-weight:600}
+.pay-valor-recebido{margin-bottom:16px}
+.pay-valor-recebido label{font-size:13px;font-weight:600;color:var(--gray-600);display:block;margin-bottom:6px}
+.pay-valor-recebido input{width:100%;padding:12px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font-size:18px;font-weight:700;text-align:center;font-family:var(--font);outline:none}
+.pay-valor-recebido input:focus{border-color:var(--primary)}
+.pay-footer{padding:16px 20px;border-top:1px solid var(--gray-200)}
+.btn{padding:14px 24px;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font);width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:var(--secondary);color:#fff}.btn-secondary:hover{background:#1B5E3C}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#C72C39}
+.btn-outline{background:#fff;border:2px solid var(--gray-200);color:var(--gray-600)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* SANGRIA / SUPRIMENTO */
+.operacao-card{background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.operacao-card h4{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.operacao-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px}
+.operacao-btn{padding:20px;border:2px solid var(--gray-200);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all .2s;background:#fff}
+.operacao-btn:hover{border-color:var(--warning);background:var(--warning-light)}
+.operacao-btn.sangria:hover{border-color:var(--danger);background:var(--danger-light)}
+.operacao-icon{font-size:36px;display:block;margin-bottom:8px}
+.operacao-label{font-size:14px;font-weight:700}
+.operacao-desc{font-size:12px;color:var(--gray-400)}
+
+/* FECHAMENTO */
+.fechamento-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.fechamento-card{background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.fechamento-card h4{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.fechamento-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-100);font-size:14px}
+.fechamento-row:last-child{border:none}
+.fechamento-row span:first-child{color:var(--gray-600)}
+.fechamento-row span:last-child{font-weight:700}
+.fechamento-total{display:flex;justify-content:space-between;padding:14px 0;font-size:18px;font-weight:800;border-top:2px solid var(--gray-800);margin-top:8px}
+.fechamento-diff{padding:12px;border-radius:var(--radius-sm);margin-top:12px;font-weight:600;text-align:center}
+.fechamento-diff.ok{background:var(--success-light);color:var(--success)}
+.fechamento-diff.neg{background:var(--danger-light);color:var(--danger)}
+.fechamento-diff.pos{background:var(--warning-light);color:var(--warning)}
+.fechamento-blind{margin-top:16px}
+.fechamento-blind label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--gray-600)}
+.fechamento-blind input{width:100%;padding:12px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;font-weight:700;text-align:right;font-family:var(--font);outline:none}
+.fechamento-blind input:focus{border-color:var(--primary)}
+
+/* MOVIMENTAÇÕES */
+.mov-list{display:flex;flex-direction:column;gap:8px}
+.mov-row{background:#fff;border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);font-size:14px}
+.mov-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.mov-icon.entrada{background:var(--success-light)}.mov-icon.saida{background:var(--danger-light)}
+.mov-info{flex:1}
+.mov-desc{font-weight:600}.mov-hora{font-size:12px;color:var(--gray-400)}
+.mov-valor{font-weight:700;font-size:15px}
+.mov-valor.positivo{color:var(--success)}.mov-valor.negativo{color:var(--danger)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:var(--radius-lg);width:90%;max-width:500px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);transform:translateY(20px) scale(.95);transition:transform .3s}
+.modal-overlay.show .modal{transform:translateY(0) scale(1)}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:18px;font-weight:700}
+.modal-close{width:32px;height:32px;border:none;background:var(--gray-100);border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--gray-200)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;gap:10px;justify-content:flex-end}
+
+/* TOAST */
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{background:#fff;border-radius:var(--radius);padding:14px 20px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:280px;animation:toastIn .4s ease,toastOut .4s ease 2.6s forwards;border-left:4px solid var(--success)}
+.toast.warning{border-left-color:var(--warning)}.toast.error{border-left-color:var(--danger)}
+.toast-icon{font-size:20px}.toast-msg{font-size:13px;font-weight:600}
+
+/* RECEIPT */
+.receipt{max-width:320px;margin:0 auto;background:#fff;border:1px dashed var(--gray-300);border-radius:var(--radius);padding:24px 20px;font-size:13px;text-align:center}
+.receipt-logo{font-size:36px;margin-bottom:8px;display:block}
+.receipt-name{font-weight:800;font-size:16px;margin-bottom:12px}
+.receipt-sep{border:none;border-top:1px dashed var(--gray-300);margin:10px 0}
+.receipt-row{display:flex;justify-content:space-between;padding:3px 0;text-align:left}
+.receipt-row.bold{font-weight:700}
+.receipt-total{font-size:18px;font-weight:800;margin:8px 0}
+.receipt-footer{font-size:11px;color:var(--gray-400);margin-top:12px}
+
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(60px)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes successPulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+.fade-in{animation:fadeIn .5s ease}
+.slide-in{animation:slideIn .4s ease}
+
+@media(max-width:900px){.payment-layout{grid-template-columns:1fr}.pay-panel{position:static}.caixa-status-bar{grid-template-columns:repeat(2,1fr)}.fechamento-layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo" onclick="location.href='login-dashboard.html'" title="Dashboard">🍞</div>
+    <div class="sidebar-item" onclick="location.href='atendimento.html'">➕<span class="tooltip">Pedidos</span></div>
+    <div class="sidebar-item active">💰<span class="tooltip">Caixa</span></div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="location.href='estoque.html'">📦<span class="tooltip">Estoque</span></div>
+    <div class="sidebar-item" onclick="location.href='financeiro.html'">💵<span class="tooltip">Financeiro</span></div>
+    <div class="sidebar-item" onclick="location.href='cadastros.html'">👥<span class="tooltip">Cadastros</span></div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-item" onclick="location.href='configuracoes.html'">⚙️<span class="tooltip">Config</span></div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="header">
+      <div class="header-left">
+        <div>
+          <div class="header-title" id="pageTitle">💰 Caixa</div>
+          <div class="header-subtitle" id="pageSubtitle">Pagamentos e movimentações</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="header-badge" id="caixaStatusBadge"></span>
+        <div class="header-user" title="Maria (Caixa)">MA</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- ABERTURA CAIXA (se fechado) -->
+      <div id="page-abertura" class="page-content">
+        <div class="caixa-abertura fade-in">
+          <span class="caixa-abertura-icon">💰</span>
+          <h2>Abrir Caixa</h2>
+          <p>Informe o valor em dinheiro na gaveta para iniciar o turno</p>
+          <div class="form-group">
+            <label>Operador</label>
+            <input class="form-input" value="Maria Souza" readonly>
+          </div>
+          <div class="form-group">
+            <label>Valor de Abertura (Fundo de Troco)</label>
+            <input class="form-input form-input-money" id="valor-abertura" type="text" placeholder="R$ 0,00" value="R$ 200,00">
+          </div>
+          <button class="btn btn-primary" onclick="abrirCaixa()" style="margin-top:12px">🔓 Abrir Caixa</button>
+        </div>
+      </div>
+
+      <!-- CAIXA ABERTO -->
+      <div id="page-caixa-open" class="page-content hidden">
+        <div class="tabs-bar">
+          <button class="tab-btn active" onclick="showCaixaTab('pagamento')">💳 Pagamento</button>
+          <button class="tab-btn" onclick="showCaixaTab('movimentacoes')">📊 Movimentações</button>
+          <button class="tab-btn" onclick="showCaixaTab('sangria')">💸 Sangria / Suprimento</button>
+          <button class="tab-btn" onclick="showCaixaTab('fechamento')">🔒 Fechar Caixa</button>
+        </div>
+
+        <!-- TAB: PAGAMENTO -->
+        <div id="tab-pagamento" class="tab-content fade-in">
+          <div class="caixa-status-bar">
+            <div class="stat-card"><div class="stat-icon" style="background:#EBF5FB">📋</div><div><div class="stat-value" id="st-pendentes">0</div><div class="stat-label">Pendentes</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:#D5F5E3">✅</div><div><div class="stat-value" id="st-pagos">0</div><div class="stat-label">Pagos</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:#FFF3E0">💵</div><div><div class="stat-value" id="st-dinheiro">R$0</div><div class="stat-label">Dinheiro</div></div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:#F5EEF8">💰</div><div><div class="stat-value" id="st-total">R$0</div><div class="stat-label">Total Vendas</div></div></div>
+          </div>
+          <div class="payment-layout">
+            <div>
+              <div style="font-size:15px;font-weight:700;margin-bottom:12px">📋 Pedidos para cobrar</div>
+              <div class="payment-queue" id="payment-queue"></div>
+            </div>
+            <div class="pay-panel" id="pay-panel">
+              <div class="pay-header"><h3>💳 Recebimento</h3></div>
+              <div class="pay-body" id="pay-body">
+                <div style="text-align:center;padding:40px;color:var(--gray-400)"><div style="font-size:48px;margin-bottom:8px">👈</div>Selecione um pedido</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: MOVIMENTAÇÕES -->
+        <div id="tab-movimentacoes" class="tab-content hidden fade-in">
+          <div style="font-size:15px;font-weight:700;margin-bottom:12px">📊 Movimentações do Caixa</div>
+          <div class="mov-list" id="mov-list"></div>
+        </div>
+
+        <!-- TAB: SANGRIA / SUPRIMENTO -->
+        <div id="tab-sangria" class="tab-content hidden fade-in">
+          <div class="operacao-grid">
+            <div class="operacao-btn sangria" onclick="openOperacaoModal('SANGRIA')">
+              <span class="operacao-icon">💸</span>
+              <div class="operacao-label">Sangria</div>
+              <div class="operacao-desc">Retirada de dinheiro</div>
+            </div>
+            <div class="operacao-btn" onclick="openOperacaoModal('SUPRIMENTO')">
+              <span class="operacao-icon">💵</span>
+              <div class="operacao-label">Suprimento</div>
+              <div class="operacao-desc">Adição de dinheiro</div>
+            </div>
+          </div>
+          <div style="font-size:15px;font-weight:700;margin:20px 0 12px">📜 Histórico de Operações</div>
+          <div class="mov-list" id="operacoes-list"></div>
+        </div>
+
+        <!-- TAB: FECHAMENTO -->
+        <div id="tab-fechamento" class="tab-content hidden fade-in">
+          <div class="fechamento-layout">
+            <div class="fechamento-card">
+              <h4>📊 Resumo do Sistema</h4>
+              <div class="fechamento-row"><span>Abertura (Fundo)</span><span id="fech-abertura">R$ 200,00</span></div>
+              <div class="fechamento-row"><span>Vendas em Dinheiro</span><span id="fech-dinheiro">R$ 0,00</span></div>
+              <div class="fechamento-row"><span>Vendas Débito</span><span id="fech-debito">R$ 0,00</span></div>
+              <div class="fechamento-row"><span>Vendas Crédito</span><span id="fech-credito">R$ 0,00</span></div>
+              <div class="fechamento-row"><span>Vendas PIX</span><span id="fech-pix">R$ 0,00</span></div>
+              <div class="fechamento-row"><span>Fiado</span><span id="fech-fiado">R$ 0,00</span></div>
+              <div class="fechamento-row"><span style="color:var(--danger)">Sangrias</span><span id="fech-sangrias" style="color:var(--danger)">R$ 0,00</span></div>
+              <div class="fechamento-row"><span style="color:var(--success)">Suprimentos</span><span id="fech-suprimentos" style="color:var(--success)">R$ 0,00</span></div>
+              <div class="fechamento-total"><span>Dinheiro Esperado</span><span id="fech-esperado">R$ 200,00</span></div>
+            </div>
+            <div class="fechamento-card">
+              <h4>🔢 Conferência Cega</h4>
+              <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px">Conte o dinheiro na gaveta e informe o valor abaixo</p>
+              <div class="fechamento-blind">
+                <label>Valor Informado (R$)</label>
+                <input id="blind-valor" type="text" placeholder="0,00" oninput="calcDiff()">
+              </div>
+              <div class="fechamento-diff ok" id="fech-diff" style="margin-top:16px">Diferença: R$ 0,00</div>
+              <div style="margin-top:20px">
+                <div class="form-group">
+                  <label>Observação</label>
+                  <textarea class="form-input" rows="3" placeholder="Observações sobre o fechamento..."></textarea>
+                </div>
+                <button class="btn btn-danger" onclick="fecharCaixa()" style="margin-top:8px">🔒 Confirmar Fechamento</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OPERAÇÃO -->
+<div class="modal-overlay" id="modal-operacao">
+  <div class="modal">
+    <div class="modal-header"><h2 id="modal-op-title">Sangria</h2><button class="modal-close" onclick="closeModal('modal-operacao')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Valor (R$)</label><input class="form-input form-input-money" id="op-valor" type="text" placeholder="R$ 0,00"></div>
+      <div class="form-group"><label>Motivo</label><input class="form-input" id="op-motivo" placeholder="Ex: Pagamento de fornecedor"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-operacao')">Cancelar</button><button class="btn btn-primary" onclick="confirmarOperacao()">✅ Confirmar</button></div>
+  </div>
+</div>
+
+<!-- MODAL RECIBO -->
+<div class="modal-overlay" id="modal-recibo">
+  <div class="modal">
+    <div class="modal-header"><h2>🧾 Comprovante</h2><button class="modal-close" onclick="closeModal('modal-recibo')">✕</button></div>
+    <div class="modal-body" id="modal-recibo-body"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-recibo')">Fechar</button><button class="btn btn-primary" onclick="closeModal('modal-recibo')">🖨️ Imprimir</button></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// === STATE ===
+let caixaAberto=false,valorAbertura=200,
+  pedidos=[],pagamentos=[],movimentacoes=[],
+  selectedPedido=null,selectedMethod=null,curOpTipo=null,
+  pCounter=0;
+
+function init(){
+  updateCaixaStatus();generateSamplePedidos();
+}
+
+function updateCaixaStatus(){
+  const b=document.getElementById('caixaStatusBadge');
+  if(caixaAberto){b.textContent='🟢 Caixa Aberto';b.className='header-badge badge-open';document.getElementById('page-abertura').classList.add('hidden');document.getElementById('page-caixa-open').classList.remove('hidden')}
+  else{b.textContent='🔴 Caixa Fechado';b.className='header-badge badge-closed';document.getElementById('page-abertura').classList.remove('hidden');document.getElementById('page-caixa-open').classList.add('hidden')}
+}
+
+function abrirCaixa(){
+  const v=document.getElementById('valor-abertura').value.replace(/[^\d,\.]/g,'').replace(',','.');
+  valorAbertura=parseFloat(v)||200;caixaAberto=true;
+  movimentacoes.push({tipo:'ABERTURA',valor:valorAbertura,desc:'Abertura de caixa',hora:new Date()});
+  updateCaixaStatus();renderPaymentQueue();renderStats();renderMovList();
+  showToast('🔓 Caixa aberto com fundo de R$ '+fmt(valorAbertura));
+}
+
+function fecharCaixa(){
+  caixaAberto=false;movimentacoes.push({tipo:'FECHAMENTO',valor:0,desc:'Fechamento de caixa',hora:new Date()});
+  updateCaixaStatus();showToast('🔒 Caixa fechado com sucesso');
+}
+
+// TABS
+function showCaixaTab(tab){document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));document.getElementById('tab-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));event.currentTarget.classList.add('active');
+  if(tab==='pagamento'){renderPaymentQueue();renderStats()}if(tab==='movimentacoes')renderMovList();if(tab==='sangria')renderOpList();if(tab==='fechamento')renderFechamento()}
+
+function generateSamplePedidos(){
+  pCounter++;pedidos.push({id:pCounter,numero:pCounter,mod:'BALCAO',status:'PRONTO',itens:[{nome:'Pão Francês',emoji:'🥖',qtd:10,preco:.75},{nome:'Café',emoji:'☕',qtd:1,preco:4}],total:11.5,hora:new Date(Date.now()-600000),pago:false});
+  pCounter++;pedidos.push({id:pCounter,numero:pCounter,mod:'DELIVERY',status:'PRONTO',itens:[{nome:'X-Salada',emoji:'🍔',qtd:2,preco:14},{nome:'Refrigerante',emoji:'🥤',qtd:2,preco:6}],total:40,hora:new Date(Date.now()-300000),pago:false});
+  pCounter++;pedidos.push({id:pCounter,numero:pCounter,mod:'MESA',mesaId:3,status:'PRONTO',itens:[{nome:'Misto Quente',emoji:'🥪',qtd:1,preco:8},{nome:'Café',emoji:'☕',qtd:2,preco:4},{nome:'Bolo Chocolate',emoji:'🍫',qtd:1,preco:8}],total:24,hora:new Date(Date.now()-180000),pago:false});
+  pCounter++;pedidos.push({id:pCounter,numero:pCounter,mod:'VIAGEM',status:'PRONTO',itens:[{nome:'Coxinha',emoji:'🍗',qtd:4,preco:6},{nome:'Pastel',emoji:'🥟',qtd:3,preco:7}],total:45,hora:new Date(Date.now()-60000),pago:false});
+}
+
+// PAYMENT QUEUE
+function renderPaymentQueue(){const q=document.getElementById('payment-queue');const pends=pedidos.filter(p=>!p.pago);
+  if(!pends.length){q.innerHTML=`<div style="text-align:center;padding:40px;color:var(--gray-400)"><div style="font-size:48px;margin-bottom:8px">✅</div>Nenhum pedido pendente</div>`;return}
+  const ml={BALCAO:'🏪 Balcão',MESA:'🪑 Mesa',VIAGEM:'🛍️ Viagem',DELIVERY:'🛵 Delivery'};
+  q.innerHTML=pends.map(p=>{const sel=selectedPedido&&selectedPedido.id===p.id?'selected':'';const h=p.hora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    return`<div class="pedido-pay-card ${sel}" onclick="selectPedido(${p.id})"><div class="pedido-pay-num">#${String(p.numero).padStart(3,'0')}</div><div class="pedido-pay-info"><span class="pedido-pay-mod">${ml[p.mod]}</span>${p.mesaId?' Mesa '+p.mesaId:''}<div class="pedido-pay-itens">${p.itens.map(i=>i.qtd+'x '+i.nome).join(', ')} • ${h}</div></div><div class="pedido-pay-total">R$ ${fmt(p.total)}</div></div>`}).join('')}
+
+function selectPedido(id){selectedPedido=pedidos.find(p=>p.id===id);selectedMethod=null;renderPaymentQueue();renderPayPanel()}
+
+function renderPayPanel(){const b=document.getElementById('pay-body');if(!selectedPedido){b.innerHTML=`<div style="text-align:center;padding:40px;color:var(--gray-400)"><div style="font-size:48px;margin-bottom:8px">👈</div>Selecione um pedido</div>`;return}
+  b.innerHTML=`<div class="pay-total-display"><div class="pay-total-label">Total a Cobrar</div><div class="pay-total-value">R$ ${fmt(selectedPedido.total)}</div></div><div style="font-size:13px;font-weight:700;color:var(--gray-600);margin-bottom:8px">Forma de Pagamento</div><div class="pay-methods-grid"><div class="pay-method ${selectedMethod==='DINHEIRO'?'selected':''}" onclick="selMethod('DINHEIRO')"><span class="pay-method-icon">💵</span><div class="pay-method-label">Dinheiro</div></div><div class="pay-method ${selectedMethod==='DEBITO'?'selected':''}" onclick="selMethod('DEBITO')"><span class="pay-method-icon">💳</span><div class="pay-method-label">Débito</div></div><div class="pay-method ${selectedMethod==='CREDITO'?'selected':''}" onclick="selMethod('CREDITO')"><span class="pay-method-icon">🏦</span><div class="pay-method-label">Crédito</div></div><div class="pay-method ${selectedMethod==='PIX'?'selected':''}" onclick="selMethod('PIX')"><span class="pay-method-icon">📱</span><div class="pay-method-label">PIX</div></div><div class="pay-method ${selectedMethod==='FIADO'?'selected':''}" onclick="selMethod('FIADO')"><span class="pay-method-icon">📝</span><div class="pay-method-label">Fiado</div></div><div class="pay-method ${selectedMethod==='MISTO'?'selected':''}" onclick="selMethod('MISTO')"><span class="pay-method-icon">🔀</span><div class="pay-method-label">Misto</div></div></div><div id="pay-extra"></div><button class="btn btn-secondary" ${!selectedMethod?'disabled':''} onclick="confirmarPagamento()">💰 Confirmar Pagamento</button>`
+  renderPayExtra()}
+
+function selMethod(m){selectedMethod=m;renderPayPanel()}
+
+function renderPayExtra(){const e=document.getElementById('pay-extra');if(!e)return;
+  if(selectedMethod==='DINHEIRO'){e.innerHTML=`<div class="pay-valor-recebido"><label>Valor Recebido</label><input id="val-recebido" type="text" placeholder="0,00" oninput="calcTroco()"></div><div class="pay-troco" id="pay-troco" style="display:none"><span>Troco</span><span id="troco-val">R$ 0,00</span></div>`}
+  else if(selectedMethod==='FIADO'){e.innerHTML=`<div style="padding:12px;background:var(--warning-light);border-radius:var(--radius-sm);margin-bottom:16px"><strong>⚠️ Fiado</strong><div style="font-size:13px;margin-top:4px">Apenas para clientes cadastrados. O valor será lançado em contas a receber.</div></div><div class="form-group"><label>Cliente</label><select class="form-input"><option>Selecione o cliente</option><option>João Silva — CPF xxx.xxx.xxx-01</option><option>Maria Oliveira — CPF xxx.xxx.xxx-02</option><option>Pedro Santos — CPF xxx.xxx.xxx-03</option></select></div>`}
+  else if(selectedMethod==='MISTO'){e.innerHTML=`<div class="pay-split-section"><div class="pay-split-title">Dividir Pagamento</div><div id="split-rows"><div class="pay-split-row"><select class="form-input" style="width:auto;padding:8px"><option>💵 Dinheiro</option><option>💳 Débito</option><option>🏦 Crédito</option><option>📱 PIX</option></select><input type="text" placeholder="R$ 0,00" value="${fmt(selectedPedido.total/2)}" style="width:100px;padding:8px;border:1px solid var(--gray-200);border-radius:6px;text-align:right"></div><div class="pay-split-row"><select class="form-input" style="width:auto;padding:8px"><option>💳 Débito</option><option>💵 Dinheiro</option><option>🏦 Crédito</option><option>📱 PIX</option></select><input type="text" placeholder="R$ 0,00" value="${fmt(selectedPedido.total/2)}" style="width:100px;padding:8px;border:1px solid var(--gray-200);border-radius:6px;text-align:right"></div></div><div class="pay-split-add" onclick="addSplitRow()">+ Adicionar forma</div></div>`}
+  else e.innerHTML=''}
+
+function calcTroco(){const v=parseFloat((document.getElementById('val-recebido').value||'0').replace(',','.'))||0;const t=v-selectedPedido.total;const tEl=document.getElementById('pay-troco'),tv=document.getElementById('troco-val');if(v>=selectedPedido.total){tEl.style.display='flex';tv.textContent='R$ '+fmt(t)}else tEl.style.display='none'}
+
+function confirmarPagamento(){if(!selectedPedido||!selectedMethod)return;
+  selectedPedido.pago=true;selectedPedido.formaPgto=selectedMethod;
+  pagamentos.push({pedido:selectedPedido.numero,valor:selectedPedido.total,forma:selectedMethod,hora:new Date()});
+  movimentacoes.push({tipo:'VENDA',valor:selectedPedido.total,desc:`Pedido #${String(selectedPedido.numero).padStart(3,'0')} (${selectedMethod})`,hora:new Date(),forma:selectedMethod});
+  showToast(`✅ Pagamento R$ ${fmt(selectedPedido.total)} — ${selectedMethod}`);showRecibo(selectedPedido);
+  selectedPedido=null;selectedMethod=null;renderPaymentQueue();renderPayPanel();renderStats()}
+
+function showRecibo(p){const ml={BALCAO:'Balcão',MESA:'Mesa',VIAGEM:'Viagem',DELIVERY:'Delivery'};
+  let h=`<div class="receipt"><span class="receipt-logo">🍞</span><div class="receipt-name">PADARIA DO SEU ZÉ</div><div style="font-size:12px;color:var(--gray-400)">CNPJ: 12.345.678/0001-00</div><hr class="receipt-sep"><div class="receipt-row bold"><span>Pedido #${String(p.numero).padStart(3,'0')}</span><span>${ml[p.mod]}</span></div><hr class="receipt-sep">`;
+  p.itens.forEach(i=>{h+=`<div class="receipt-row"><span>${i.qtd}x ${i.nome}</span><span>R$ ${fmt(i.preco*i.qtd)}</span></div>`});
+  h+=`<hr class="receipt-sep"><div class="receipt-total">Total: R$ ${fmt(p.total)}</div><div class="receipt-row"><span>Forma:</span><span>${p.formaPgto}</span></div><hr class="receipt-sep"><div class="receipt-footer">${new Date().toLocaleString('pt-BR')}<br>Obrigado pela preferência!</div></div>`;
+  document.getElementById('modal-recibo-body').innerHTML=h;openModal('modal-recibo')}
+
+// STATS
+function renderStats(){const pends=pedidos.filter(p=>!p.pago).length,pagos=pagamentos.length;
+  const din=pagamentos.filter(p=>p.forma==='DINHEIRO').reduce((s,p)=>s+p.valor,0);
+  const total=pagamentos.reduce((s,p)=>s+p.valor,0);
+  document.getElementById('st-pendentes').textContent=pends;document.getElementById('st-pagos').textContent=pagos;
+  document.getElementById('st-dinheiro').textContent='R$'+fmt(din);document.getElementById('st-total').textContent='R$'+fmt(total)}
+
+// MOVIMENTAÇÕES
+function renderMovList(){const l=document.getElementById('mov-list');
+  if(!movimentacoes.length){l.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray-400)">Nenhuma movimentação</div>';return}
+  l.innerHTML=[...movimentacoes].reverse().map(m=>{const h=m.hora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});const en=['ABERTURA','SUPRIMENTO','VENDA'].includes(m.tipo);
+    const icons={ABERTURA:'🔓',FECHAMENTO:'🔒',VENDA:'💰',SANGRIA:'💸',SUPRIMENTO:'💵'};
+    return`<div class="mov-row slide-in"><div class="mov-icon ${en?'entrada':'saida'}">${icons[m.tipo]||'📝'}</div><div class="mov-info"><div class="mov-desc">${m.desc}</div><div class="mov-hora">${h}</div></div><div class="mov-valor ${en?'positivo':'negativo'}">${en?'+':'−'}R$ ${fmt(m.valor)}</div></div>`}).join('')}
+
+// SANGRIA / SUPRIMENTO
+function openOperacaoModal(tipo){curOpTipo=tipo;document.getElementById('modal-op-title').textContent=tipo==='SANGRIA'?'💸 Sangria':'💵 Suprimento';document.getElementById('op-valor').value='';document.getElementById('op-motivo').value='';openModal('modal-operacao')}
+function confirmarOperacao(){const v=parseFloat((document.getElementById('op-valor').value||'0').replace(/[^\d,\.]/g,'').replace(',','.'))||0;if(!v){showToast('Informe o valor','warning');return}
+  const mot=document.getElementById('op-motivo').value||curOpTipo;
+  movimentacoes.push({tipo:curOpTipo,valor:v,desc:mot,hora:new Date()});
+  showToast(`${curOpTipo==='SANGRIA'?'💸 Sangria':'💵 Suprimento'} de R$ ${fmt(v)} registrado`);closeModal('modal-operacao');renderOpList();renderStats()}
+function renderOpList(){const l=document.getElementById('operacoes-list');const ops=movimentacoes.filter(m=>m.tipo==='SANGRIA'||m.tipo==='SUPRIMENTO');
+  if(!ops.length){l.innerHTML='<div style="text-align:center;padding:40px;color:var(--gray-400)">Nenhuma operação registrada</div>';return}
+  l.innerHTML=[...ops].reverse().map(m=>{const h=m.hora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});const en=m.tipo==='SUPRIMENTO';
+    return`<div class="mov-row slide-in"><div class="mov-icon ${en?'entrada':'saida'}">${en?'💵':'💸'}</div><div class="mov-info"><div class="mov-desc">${m.desc}</div><div class="mov-hora">${h}</div></div><div class="mov-valor ${en?'positivo':'negativo'}">${en?'+':'−'}R$ ${fmt(m.valor)}</div></div>`}).join('')}
+
+// FECHAMENTO
+function renderFechamento(){
+  const din=pagamentos.filter(p=>p.forma==='DINHEIRO').reduce((s,p)=>s+p.valor,0);
+  const deb=pagamentos.filter(p=>p.forma==='DEBITO').reduce((s,p)=>s+p.valor,0);
+  const cre=pagamentos.filter(p=>p.forma==='CREDITO').reduce((s,p)=>s+p.valor,0);
+  const pix=pagamentos.filter(p=>p.forma==='PIX').reduce((s,p)=>s+p.valor,0);
+  const fi=pagamentos.filter(p=>p.forma==='FIADO').reduce((s,p)=>s+p.valor,0);
+  const sang=movimentacoes.filter(m=>m.tipo==='SANGRIA').reduce((s,m)=>s+m.valor,0);
+  const sup=movimentacoes.filter(m=>m.tipo==='SUPRIMENTO').reduce((s,m)=>s+m.valor,0);
+  const esperado=valorAbertura+din-sang+sup;
+  document.getElementById('fech-abertura').textContent='R$ '+fmt(valorAbertura);
+  document.getElementById('fech-dinheiro').textContent='R$ '+fmt(din);
+  document.getElementById('fech-debito').textContent='R$ '+fmt(deb);
+  document.getElementById('fech-credito').textContent='R$ '+fmt(cre);
+  document.getElementById('fech-pix').textContent='R$ '+fmt(pix);
+  document.getElementById('fech-fiado').textContent='R$ '+fmt(fi);
+  document.getElementById('fech-sangrias').textContent='- R$ '+fmt(sang);
+  document.getElementById('fech-suprimentos').textContent='+ R$ '+fmt(sup);
+  document.getElementById('fech-esperado').textContent='R$ '+fmt(esperado)}
+
+function calcDiff(){const v=parseFloat((document.getElementById('blind-valor').value||'0').replace(',','.'))||0;
+  const din=pagamentos.filter(p=>p.forma==='DINHEIRO').reduce((s,p)=>s+p.valor,0);
+  const sang=movimentacoes.filter(m=>m.tipo==='SANGRIA').reduce((s,m)=>s+m.valor,0);
+  const sup=movimentacoes.filter(m=>m.tipo==='SUPRIMENTO').reduce((s,m)=>s+m.valor,0);
+  const esp=valorAbertura+din-sang+sup;const d=v-esp;const el=document.getElementById('fech-diff');
+  if(Math.abs(d)<0.01){el.className='fechamento-diff ok';el.textContent='✅ Conferência OK — Sem diferença'}
+  else if(d<0){el.className='fechamento-diff neg';el.textContent=`⚠️ Falta: R$ ${fmt(Math.abs(d))}`}
+  else{el.className='fechamento-diff pos';el.textContent=`⚠️ Sobra: R$ ${fmt(d)}`}}
+
+// UTILS
+function fmt(v){return v.toFixed(2).replace('.',',')}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const icons={success:'✅',warning:'⚠️',error:'❌'};const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span class="toast-icon">${icons[type]}</span><span class="toast-msg">${msg}</span>`;c.appendChild(t);setTimeout(()=>t.remove(),3200)}
+
+document.addEventListener('DOMContentLoaded',init);
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')})});
+</script>
+</body>
+</html>

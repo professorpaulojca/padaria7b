@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padaria — Atendimento e Pedidos</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#E8722A;--primary-dark:#C45D1E;--primary-light:#FCEEE4;
+  --secondary:#2D6A4F;--secondary-light:#D8F3DC;
+  --accent:#3A86FF;--accent-light:#E8F0FE;
+  --danger:#E63946;--danger-light:#FFE0E3;
+  --warning:#F4A261;--warning-light:#FFF3E0;
+  --success:#2D6A4F;--success-light:#D8F3DC;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;
+  --gray-800:#1F2937;--gray-900:#111827;
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;--radius-xl:20px;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+  --shadow-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);
+  --transition:.2s ease;
+  --font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--font);background:var(--gray-100);color:var(--gray-800);line-height:1.5;overflow-x:hidden}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:72px;background:var(--gray-900);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:0}
+.sidebar-logo{width:44px;height:44px;background:var(--primary);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;cursor:pointer}
+.sidebar-divider{width:36px;height:1px;background:var(--gray-700);margin:6px 0;flex-shrink:0}
+.sidebar-item{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gray-400);cursor:pointer;transition:all var(--transition);position:relative;flex-shrink:0}
+.sidebar-item:hover{background:var(--gray-700);color:#fff}
+.sidebar-item.active{background:var(--primary);color:#fff}
+.sidebar-item .tooltip{position:absolute;left:60px;background:var(--gray-800);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--transition);z-index:200}
+.sidebar-item:hover .tooltip{opacity:1}
+.sidebar-item .notif-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:2px solid var(--gray-900)}
+.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px;align-items:center;padding-top:8px}
+.main{margin-left:72px;flex:1;display:flex;flex-direction:column}
+.header{background:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:16px}
+.header-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+.header-subtitle{font-size:13px;color:var(--gray-500)}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-badge{background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.header-user{width:36px;height:36px;border-radius:50%;background:var(--secondary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;cursor:pointer}
+.content{padding:24px;flex:1}
+.hidden{display:none !important}
+
+/* TABS BAR */
+.tabs-bar{display:flex;gap:4px;background:#fff;padding:4px;border-radius:var(--radius);margin-bottom:20px;box-shadow:var(--shadow)}
+.tab-btn{flex:1;padding:12px 16px;border:none;border-radius:var(--radius-sm);background:transparent;font-size:14px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all var(--transition);font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px}
+.tab-btn:hover{background:var(--gray-100);color:var(--gray-700)}
+.tab-btn.active{background:var(--primary);color:#fff;box-shadow:var(--shadow-md)}
+.tab-btn .tab-count{padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.tab-btn.active .tab-count{background:rgba(255,255,255,.3)}
+.tab-btn:not(.active) .tab-count{background:var(--gray-200);color:var(--gray-600)}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:all .2s ease}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px}
+.stat-icon.orders{background:#EBF5FB}.stat-icon.preparing{background:#FFF3E0}.stat-icon.ready{background:#D5F5E3}.stat-icon.revenue{background:#F5EEF8}
+.stat-value{font-size:22px;font-weight:800;color:var(--gray-900)}
+.stat-label{font-size:12px;color:var(--gray-500)}
+
+/* SECTION */
+.section-title{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--gray-800);display:flex;align-items:center;gap:8px}
+
+/* === NOVO PEDIDO FLOW === */
+/* Modalidade */
+.modalidade-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:750px;margin:0 auto}
+.modalidade-card{background:#fff;border:2px solid var(--gray-200);border-radius:var(--radius-lg);padding:32px 16px;text-align:center;cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden}
+.modalidade-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--primary);transform:scaleX(0);transition:transform .3s ease}
+.modalidade-card:hover::before{transform:scaleX(1)}
+.modalidade-card:hover{border-color:var(--primary);transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.modalidade-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.modalidade-card.selected::before{transform:scaleX(1)}
+.modalidade-icon{font-size:48px;margin-bottom:10px;display:block;transition:transform .3s ease}
+.modalidade-card:hover .modalidade-icon{transform:scale(1.15)}
+.modalidade-label{font-weight:700;font-size:16px;color:var(--gray-700)}
+.modalidade-desc{font-size:12px;color:var(--gray-400);margin-top:4px}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:13px}
+.breadcrumb-item{color:var(--gray-400);cursor:pointer;transition:color var(--transition)}
+.breadcrumb-item:hover{color:var(--primary)}
+.breadcrumb-item.active{color:var(--gray-700);font-weight:600;cursor:default}
+.breadcrumb-sep{color:var(--gray-300)}
+
+/* Categorias */
+.categorias-bar{display:flex;gap:8px;padding:12px 0;overflow-x:auto;margin-bottom:16px}
+.categoria-chip{padding:10px 20px;border-radius:24px;border:2px solid var(--gray-200);background:#fff;font-size:14px;font-weight:600;color:var(--gray-600);cursor:pointer;white-space:nowrap;transition:all var(--transition)}
+.categoria-chip:hover{border-color:var(--primary);color:var(--primary)}
+.categoria-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* Search bar */
+.search-bar{position:relative;margin-bottom:16px}
+.search-bar input{width:100%;padding:12px 16px 12px 44px;border:2px solid var(--gray-200);border-radius:var(--radius);font-size:14px;font-family:var(--font);outline:none;transition:all var(--transition);background:var(--gray-50)}
+.search-bar input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(232,114,42,.15)}
+.search-bar::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px}
+
+/* Produtos Grid (McDonald's style) */
+.produtos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.produto-card{background:#fff;border-radius:var(--radius-lg);padding:16px;text-align:center;cursor:pointer;border:2px solid transparent;transition:all .2s ease;position:relative;box-shadow:var(--shadow)}
+.produto-card:hover{border-color:var(--primary);transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.produto-card.added{border-color:var(--secondary);background:var(--secondary-light)}
+.produto-emoji{font-size:42px;display:block;margin-bottom:8px;transition:transform .2s ease}
+.produto-card:hover .produto-emoji{transform:scale(1.2) rotate(-5deg)}
+.produto-nome{font-size:13px;font-weight:700;color:var(--gray-700)}
+.produto-preco{font-size:15px;font-weight:800;color:var(--primary);margin-top:4px}
+.produto-qtd-badge{position:absolute;top:-8px;right:-8px;width:30px;height:30px;background:var(--secondary);color:#fff;border-radius:50%;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;animation:popIn .3s ease;box-shadow:0 2px 8px rgba(45,106,79,.3)}
+.produto-add-btn{margin-top:8px;padding:6px 16px;border:none;border-radius:20px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer;opacity:0;transition:all .2s ease;font-family:var(--font)}
+.produto-card:hover .produto-add-btn{opacity:1}
+
+/* Order Layout */
+.order-layout{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+
+/* Cart Panel (mejorado) */
+.cart-panel{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--gray-200);position:sticky;top:80px;overflow:hidden;box-shadow:var(--shadow-md)}
+.cart-header{padding:16px 20px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;background:var(--gray-50)}
+.cart-header h3{font-size:15px;font-weight:700}
+.cart-count{background:var(--primary);color:#fff;width:26px;height:26px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.cart-items{padding:12px 20px;max-height:350px;overflow-y:auto}
+.cart-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--gray-100);animation:slideIn .3s ease}
+.cart-item:last-child{border-bottom:none}
+.cart-item-emoji{font-size:28px}
+.cart-item-info{flex:1}
+.cart-item-name{font-size:14px;font-weight:600}
+.cart-item-price{font-size:12px;color:var(--gray-500)}
+.cart-item-obs{font-size:11px;color:var(--accent);font-style:italic}
+.cart-item-qtd{display:flex;align-items:center;gap:8px}
+.qtd-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--gray-300);background:#fff;cursor:pointer;font-size:18px;font-weight:700;color:var(--gray-600);display:flex;align-items:center;justify-content:center;transition:all var(--transition);font-family:var(--font)}
+.qtd-btn:hover{background:var(--gray-100);border-color:var(--gray-400)}
+.qtd-btn.minus:hover{background:var(--danger-light);border-color:var(--danger);color:var(--danger)}
+.qtd-num{font-size:16px;font-weight:800;min-width:24px;text-align:center}
+.cart-footer{padding:16px 20px;border-top:2px solid var(--gray-200);background:var(--gray-50)}
+.cart-subtotals{margin-bottom:12px}
+.cart-line{display:flex;justify-content:space-between;font-size:13px;color:var(--gray-600);margin-bottom:4px}
+.cart-total{display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin-bottom:16px;padding-top:8px;border-top:1px dashed var(--gray-300)}
+.cart-total-value{color:var(--primary)}
+.btn-confirmar{width:100%;padding:16px;border:none;border-radius:var(--radius);background:var(--primary);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all .25s ease;font-family:var(--font);position:relative;overflow:hidden}
+.btn-confirmar:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-confirmar:active{transform:translateY(0)}
+.btn-confirmar:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-confirmar.success{background:var(--secondary);animation:successPulse .6s ease}
+.cart-empty{padding:40px 20px;text-align:center;color:var(--gray-400);font-size:14px}
+.cart-empty-icon{font-size:48px;margin-bottom:8px;display:block}
+
+/* Mesa Select / Plataforma */
+.mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px}
+.mesa-card{background:#fff;border-radius:var(--radius-lg);padding:20px;text-align:center;cursor:pointer;border:2px solid var(--gray-200);transition:all .25s ease;position:relative}
+.mesa-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.mesa-card.livre{border-color:var(--success)}.mesa-card.livre .mesa-status-dot{background:var(--success)}
+.mesa-card.ocupada{border-color:var(--warning);background:var(--warning-light)}.mesa-card.ocupada .mesa-status-dot{background:var(--warning)}
+.mesa-card.aguardando{border-color:var(--danger);background:var(--danger-light)}.mesa-card.aguardando .mesa-status-dot{background:var(--danger)}
+.mesa-icon{font-size:32px;margin-bottom:6px;display:block}
+.mesa-numero{font-size:22px;font-weight:800;color:var(--gray-800)}
+.mesa-status{font-size:11px;font-weight:700;text-transform:uppercase;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:4px}
+.mesa-status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.mesa-valor{font-size:14px;font-weight:700;color:var(--primary);margin-top:6px}
+.plataforma-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.plataforma-card{background:#fff;border:2px solid var(--gray-200);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .2s ease}
+.plataforma-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.plataforma-card.selected{border-color:var(--primary);background:var(--primary-light)}
+.plataforma-icon{font-size:32px;display:block;margin-bottom:6px}
+.plataforma-nome{font-size:14px;font-weight:600}
+
+/* === COZINHA === */
+.cozinha-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cozinha-column{min-height:400px}
+.cozinha-column-header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:var(--radius) var(--radius) 0 0;font-weight:700;font-size:14px;color:#fff}
+.cozinha-column-header.aguardando{background:var(--warning)}
+.cozinha-column-header.preparando{background:var(--accent)}
+.cozinha-column-header .count-pill{background:rgba(255,255,255,.3);padding:2px 10px;border-radius:12px;font-size:12px}
+.cozinha-cards{padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--gray-50);border-radius:0 0 var(--radius) var(--radius);min-height:300px}
+.cozinha-card{background:#fff;border-radius:var(--radius);border-left:5px solid var(--warning);padding:16px;box-shadow:var(--shadow);animation:slideIn .4s ease;transition:all .3s ease}
+.cozinha-card.preparando{border-left-color:var(--accent)}
+.cozinha-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cozinha-card-numero{font-weight:800;font-size:20px;color:var(--gray-900)}
+.cozinha-card-tipo{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase}
+.tipo-balcao{background:#EBF5FB;color:#2E86C1}.tipo-mesa{background:#F5EEF8;color:#8E44AD}
+.tipo-viagem{background:#FEF9E7;color:#D4AC0D}.tipo-delivery{background:#FDEDEC;color:#E74C3C}
+.cozinha-card-itens{margin-bottom:10px}
+.cozinha-card-item{font-size:14px;color:var(--gray-700);padding:3px 0;display:flex;gap:6px}
+.cozinha-card-item-qtd{font-weight:700;color:var(--gray-900);min-width:24px}
+.cozinha-card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--gray-100)}
+.cozinha-timer{font-size:14px;font-weight:600;display:flex;align-items:center;gap:4px}
+.cozinha-timer.urgente{color:var(--danger);animation:pulse 1s infinite}
+.cozinha-timer.normal{color:var(--gray-500)}
+.cozinha-btn{padding:10px 20px;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;transition:all var(--transition);font-family:var(--font)}
+.cozinha-btn.iniciar{background:var(--accent);color:#fff}
+.cozinha-btn.iniciar:hover{background:#2E73E0;transform:scale(1.05)}
+.cozinha-btn.concluir{background:var(--secondary);color:#fff}
+.cozinha-btn.concluir:hover{background:#1B5E3C;transform:scale(1.05)}
+
+/* === PEDIDOS LIST === */
+.pedidos-list{display:flex;flex-direction:column;gap:10px}
+.pedido-row{background:#fff;border-radius:var(--radius);padding:14px 20px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);transition:all var(--transition);animation:slideIn .3s ease}
+.pedido-row:hover{box-shadow:var(--shadow-md);transform:translateX(4px)}
+.pedido-numero{font-weight:800;font-size:16px;min-width:60px}
+.pedido-tipo-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;min-width:70px;text-align:center}
+.pedido-itens-resumo{flex:1;font-size:13px;color:var(--gray-600)}
+.pedido-valor{font-weight:700;color:var(--primary);font-size:15px;min-width:80px;text-align:right}
+.pedido-status-badge{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700}
+.status-aberto{background:#EBF5FB;color:#2E86C1}.status-em_preparo{background:#FFF3E0;color:#E67E22}
+.status-pronto{background:#D5F5E3;color:#27AE60}.status-entregue{background:#F5EEF8;color:#8E44AD}
+.status-finalizado{background:var(--gray-200);color:var(--gray-600)}.status-cancelado{background:var(--danger-light);color:var(--danger)}
+
+/* === MESAS PAGE === */
+.mesa-legend{display:flex;gap:16px;margin-bottom:16px;font-size:13px;color:var(--gray-600)}
+.mesa-legend-item{display:flex;align-items:center;gap:6px}
+.mesa-legend-dot{width:10px;height:10px;border-radius:50%}
+.mesa-legend-dot.livre{background:var(--success)}.mesa-legend-dot.ocupada{background:var(--warning)}.mesa-legend-dot.aguardando{background:var(--danger)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:var(--radius-lg);width:90%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);transform:translateY(20px) scale(.95);transition:transform .3s ease}
+.modal-overlay.show .modal{transform:translateY(0) scale(1)}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:18px;font-weight:700}
+.modal-close{width:32px;height:32px;border:none;background:var(--gray-100);border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background var(--transition)}
+.modal-close:hover{background:var(--gray-200)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;gap:10px;justify-content:flex-end}
+
+/* Comanda */
+.comanda-header-bar{background:var(--primary-light);padding:14px 20px;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.comanda-info{display:flex;gap:20px;align-items:center}
+.comanda-num{font-size:20px;font-weight:800;color:var(--primary)}
+.comanda-mesa{font-size:14px;color:var(--gray-600)}
+.comanda-status-pill{padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;background:var(--success-light);color:var(--success)}
+.comanda-item-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--gray-100);gap:10px}
+.comanda-item-row:last-child{border:none}
+.comanda-item-hora{font-size:11px;color:var(--gray-400);min-width:45px}
+.comanda-item-nome{flex:1;font-size:14px;font-weight:600}
+.comanda-item-qtd{font-size:13px;color:var(--gray-500)}
+.comanda-item-valor{font-weight:700;color:var(--primary);min-width:60px;text-align:right}
+
+/* TOAST */
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{background:#fff;border-radius:var(--radius);padding:14px 20px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:280px;animation:toastIn .4s ease,toastOut .4s ease 2.6s forwards;border-left:4px solid var(--success)}
+.toast.warning{border-left-color:var(--warning)}.toast.error{border-left-color:var(--danger)}
+.toast-icon{font-size:20px}.toast-msg{font-size:13px;font-weight:600}
+
+/* ANIMATIONS */
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes successPulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(60px)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .5s ease}.slide-up{animation:slideUp .5s ease}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.order-layout{grid-template-columns:1fr}.cart-panel{position:static}}
+@media(max-width:900px){.cozinha-layout{grid-template-columns:1fr}.modalidade-grid{grid-template-columns:repeat(2,1fr)}.stats-bar{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.sidebar{width:56px}.main{margin-left:56px}.produtos-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}.mesas-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}.plataforma-grid{grid-template-columns:1fr 1fr}.modalidade-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo" onclick="location.href='login-dashboard.html'" title="Dashboard">🍞</div>
+    <div class="sidebar-item active" data-page="novo-pedido" onclick="navigateTo('novo-pedido')">➕<span class="tooltip">Novo Pedido</span></div>
+    <div class="sidebar-item" data-page="pedidos" onclick="navigateTo('pedidos')">📋<span class="tooltip">Pedidos</span></div>
+    <div class="sidebar-item" data-page="cozinha" onclick="navigateTo('cozinha')">🔥<span class="tooltip">Cozinha</span></div>
+    <div class="sidebar-item" data-page="mesas" onclick="navigateTo('mesas')">🪑<span class="tooltip">Mesas</span></div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="location.href='caixa.html'">💰<span class="tooltip">Caixa</span></div>
+    <div class="sidebar-item" onclick="location.href='estoque.html'">📦<span class="tooltip">Estoque</span></div>
+    <div class="sidebar-item" onclick="location.href='financeiro.html'">💵<span class="tooltip">Financeiro</span></div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-item" onclick="location.href='configuracoes.html'">⚙️<span class="tooltip">Config</span></div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="header">
+      <div class="header-left">
+        <div>
+          <div class="header-title" id="pageTitle">Novo Pedido</div>
+          <div class="header-subtitle" id="pageSubtitle">Registrar venda</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="header-badge" id="dataBadge"></span>
+        <div class="header-user" title="Ana (Atendente)">AN</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- TABS -->
+      <div class="tabs-bar" id="mainTabs">
+        <button class="tab-btn active" onclick="navigateTo('novo-pedido')">➕ Novo Pedido</button>
+        <button class="tab-btn" onclick="navigateTo('pedidos')">📋 Pedidos <span class="tab-count" id="tabPedidosCount">0</span></button>
+        <button class="tab-btn" onclick="navigateTo('cozinha')">🔥 Cozinha <span class="tab-count" id="tabCozinhaCount">0</span></button>
+        <button class="tab-btn" onclick="navigateTo('mesas')">🪑 Mesas</button>
+      </div>
+
+      <!-- PAGE: NOVO PEDIDO -->
+      <div id="page-novo-pedido" class="page-content">
+        <div id="step-modalidade" class="fade-in">
+          <div class="section-title">📌 Como é o atendimento?</div>
+          <div class="modalidade-grid">
+            <div class="modalidade-card" onclick="selectModalidade('BALCAO')">
+              <span class="modalidade-icon">🏪</span>
+              <div class="modalidade-label">Balcão</div>
+              <div class="modalidade-desc">Venda rápida</div>
+            </div>
+            <div class="modalidade-card" onclick="selectModalidade('MESA')">
+              <span class="modalidade-icon">🪑</span>
+              <div class="modalidade-label">Mesa</div>
+              <div class="modalidade-desc">Consumo no local</div>
+            </div>
+            <div class="modalidade-card" onclick="selectModalidade('VIAGEM')">
+              <span class="modalidade-icon">🛍️</span>
+              <div class="modalidade-label">Viagem</div>
+              <div class="modalidade-desc">Leva pra casa</div>
+            </div>
+            <div class="modalidade-card" onclick="selectModalidade('DELIVERY')">
+              <span class="modalidade-icon">🛵</span>
+              <div class="modalidade-label">Delivery</div>
+              <div class="modalidade-desc">Entrega / iFood</div>
+            </div>
+          </div>
+        </div>
+        <div id="step-mesa-select" class="hidden fade-in">
+          <div class="breadcrumb"><span class="breadcrumb-item" onclick="goBackToModalidade()">Tipo</span><span class="breadcrumb-sep">›</span><span class="breadcrumb-item active">Selecionar Mesa</span></div>
+          <div class="section-title">🪑 Escolha a mesa</div>
+          <div class="mesas-grid" id="mesa-select-grid"></div>
+        </div>
+        <div id="step-delivery-select" class="hidden fade-in">
+          <div class="breadcrumb"><span class="breadcrumb-item" onclick="goBackToModalidade()">Tipo</span><span class="breadcrumb-sep">›</span><span class="breadcrumb-item active">Plataforma</span></div>
+          <div class="section-title">🛵 De onde vem o pedido?</div>
+          <div class="plataforma-grid">
+            <div class="plataforma-card" onclick="selectPlataforma('iFood')"><span class="plataforma-icon">📱</span><div class="plataforma-nome">iFood</div></div>
+            <div class="plataforma-card" onclick="selectPlataforma('Rappi')"><span class="plataforma-icon">💚</span><div class="plataforma-nome">Rappi</div></div>
+            <div class="plataforma-card" onclick="selectPlataforma('Própria')"><span class="plataforma-icon">🚗</span><div class="plataforma-nome">Entrega Própria</div></div>
+          </div>
+        </div>
+        <div id="step-produtos" class="hidden fade-in">
+          <div class="breadcrumb"><span class="breadcrumb-item" onclick="goBackToModalidade()">Tipo</span><span class="breadcrumb-sep">›</span><span class="breadcrumb-item active" id="breadcrumb-mod">Produtos</span></div>
+          <div class="order-layout">
+            <div>
+              <div class="search-bar"><input type="text" placeholder="Buscar produto..." oninput="searchProducts(this.value)"></div>
+              <div class="categorias-bar" id="categorias-bar"></div>
+              <div class="produtos-grid" id="produtos-grid"></div>
+            </div>
+            <div class="cart-panel">
+              <div class="cart-header"><h3>🛒 Pedido</h3><span class="cart-count" id="cart-count">0</span></div>
+              <div id="cart-items-container"><div class="cart-empty"><span class="cart-empty-icon">🛒</span>Toque nos produtos para adicionar</div></div>
+              <div class="cart-footer">
+                <div class="cart-subtotals">
+                  <div class="cart-line"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div>
+                </div>
+                <div class="cart-total"><span>Total</span><span class="cart-total-value" id="cart-total">R$ 0,00</span></div>
+                <button class="btn-confirmar" id="btn-confirmar" onclick="confirmarPedido()" disabled>✅ Enviar para Cozinha</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: PEDIDOS -->
+      <div id="page-pedidos" class="page-content hidden">
+        <div class="stats-bar" id="stats-bar"></div>
+        <div class="section-title">📋 Pedidos de Hoje</div>
+        <div class="pedidos-list" id="pedidos-list"></div>
+      </div>
+
+      <!-- PAGE: COZINHA -->
+      <div id="page-cozinha" class="page-content hidden">
+        <div class="cozinha-layout">
+          <div class="cozinha-column">
+            <div class="cozinha-column-header aguardando">⏳ Aguardando <span class="count-pill" id="count-aguardando">0</span></div>
+            <div class="cozinha-cards" id="fila-aguardando"></div>
+          </div>
+          <div class="cozinha-column">
+            <div class="cozinha-column-header preparando">🔥 Em Preparo <span class="count-pill" id="count-preparando">0</span></div>
+            <div class="cozinha-cards" id="fila-preparando"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: MESAS -->
+      <div id="page-mesas" class="page-content hidden">
+        <div class="section-title">🪑 Mapa de Mesas</div>
+        <div class="mesa-legend">
+          <div class="mesa-legend-item"><span class="mesa-legend-dot livre"></span>Livre</div>
+          <div class="mesa-legend-item"><span class="mesa-legend-dot ocupada"></span>Ocupada</div>
+          <div class="mesa-legend-item"><span class="mesa-legend-dot aguardando"></span>Aguardando Pgto</div>
+        </div>
+        <div class="mesas-grid" id="mesas-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COMANDA -->
+<div class="modal-overlay" id="modal-comanda">
+  <div class="modal">
+    <div class="modal-header"><h2 id="modal-comanda-title">Comanda</h2><button class="modal-close" onclick="closeModal('modal-comanda')">✕</button></div>
+    <div class="modal-body" id="modal-comanda-body"></div>
+    <div class="modal-footer"><button class="btn-confirmar" style="width:auto;padding:10px 24px" onclick="fecharComandaModal()">🧾 Fechar Comanda</button></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+const CATEGORIAS=[{id:1,nome:'Pães',emoji:'🍞'},{id:2,nome:'Salgados',emoji:'🥐'},{id:3,nome:'Doces',emoji:'🍰'},{id:4,nome:'Bebidas',emoji:'☕'},{id:5,nome:'Lanches',emoji:'🥪'},{id:6,nome:'Chapa',emoji:'🔥'}];
+const PRODUTOS=[
+  {id:1,nome:'Pão Francês',preco:.75,emoji:'🥖',catId:1},{id:2,nome:'Pão de Queijo',preco:3.5,emoji:'🧀',catId:1},
+  {id:3,nome:'Croissant',preco:5,emoji:'🥐',catId:1},{id:4,nome:'Pão Integral',preco:7,emoji:'🍞',catId:1},
+  {id:5,nome:'Coxinha',preco:6,emoji:'🍗',catId:2},{id:6,nome:'Pastel',preco:7,emoji:'🥟',catId:2},
+  {id:7,nome:'Empada',preco:5.5,emoji:'🥧',catId:2},{id:8,nome:'Esfiha',preco:4.5,emoji:'🫓',catId:2},
+  {id:9,nome:'Bolo Chocolate',preco:8,emoji:'🍫',catId:3},{id:10,nome:'Sonho',preco:5,emoji:'🍩',catId:3},
+  {id:11,nome:'Brigadeiro',preco:3,emoji:'🍬',catId:3},{id:12,nome:'Pudim',preco:7,emoji:'🍮',catId:3},
+  {id:13,nome:'Café',preco:4,emoji:'☕',catId:4},{id:14,nome:'Suco Natural',preco:8,emoji:'🧃',catId:4},
+  {id:15,nome:'Refrigerante',preco:6,emoji:'🥤',catId:4},{id:16,nome:'Água',preco:3,emoji:'💧',catId:4},
+  {id:17,nome:'Misto Quente',preco:8,emoji:'🥪',catId:5},{id:18,nome:'Bauru',preco:10,emoji:'🌯',catId:5},
+  {id:19,nome:'X-Salada',preco:14,emoji:'🍔',catId:6},{id:20,nome:'X-Egg',preco:16,emoji:'🍳',catId:6},
+  {id:21,nome:'Queijo Chapa',preco:6,emoji:'🧈',catId:6},{id:22,nome:'Pão na Chapa',preco:4.5,emoji:'🫕',catId:6},
+];
+const MESAS=[{id:1,n:1},{id:2,n:2},{id:3,n:3},{id:4,n:4},{id:5,n:5},{id:6,n:6},{id:7,n:7},{id:8,n:8},{id:9,n:9},{id:10,n:10}];
+
+let pCounter=0,cCounter=0,pedidos=[],comandas=[],curMod=null,curMesa=null,curPlat=null,curCat=null,cart=[],searchTerm='';
+
+function init(){
+  updateDateBadge();renderCategorias();renderProdutos();generateSampleData();
+  renderPedidosPage();renderCozinhaPage();renderMesasPage();startTimers();
+}
+
+function updateDateBadge(){document.getElementById('dataBadge').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'})}
+
+// NAVIGATION
+function navigateTo(page){
+  document.querySelectorAll('.page-content').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('page-'+page).classList.remove('hidden');
+  document.querySelectorAll('.sidebar-item[data-page]').forEach(s=>s.classList.remove('active'));
+  const si=document.querySelector(`.sidebar-item[data-page="${page}"]`);if(si)si.classList.add('active');
+  // Update tabs
+  document.querySelectorAll('.tab-btn').forEach((btn,i)=>{
+    btn.classList.remove('active');
+    const pages=['novo-pedido','pedidos','cozinha','mesas'];
+    if(pages[i]===page) btn.classList.add('active');
+  });
+  const titles={'novo-pedido':['Novo Pedido','Registrar venda'],'pedidos':['Pedidos','Todos os pedidos de hoje'],'cozinha':['Cozinha','Fila de preparo em tempo real'],'mesas':['Mesas','Mapa de ocupação']};
+  const[t,s]=titles[page]||['',''];
+  document.getElementById('pageTitle').textContent=t;document.getElementById('pageSubtitle').textContent=s;
+  if(page==='novo-pedido')resetPedidoFlow();if(page==='pedidos')renderPedidosPage();
+  if(page==='cozinha')renderCozinhaPage();if(page==='mesas')renderMesasPage();
+}
+
+// PEDIDO FLOW
+function resetPedidoFlow(){cart=[];curMod=null;curMesa=null;curPlat=null;showStep('step-modalidade');document.querySelectorAll('.modalidade-card').forEach(c=>c.classList.remove('selected'))}
+function showStep(id){['step-modalidade','step-mesa-select','step-delivery-select','step-produtos'].forEach(s=>document.getElementById(s).classList.add('hidden'));document.getElementById(id).classList.remove('hidden')}
+function selectModalidade(m){curMod=m;document.querySelectorAll('.modalidade-card').forEach(c=>c.classList.remove('selected'));event.currentTarget.classList.add('selected');setTimeout(()=>{if(m==='MESA'){renderMesaSelectGrid();showStep('step-mesa-select')}else if(m==='DELIVERY')showStep('step-delivery-select');else goToProducts()},200)}
+function renderMesaSelectGrid(){const g=document.getElementById('mesa-select-grid');g.innerHTML=MESAS.map(m=>{const c=comandas.find(x=>x.mesaId===m.id&&x.status==='ABERTA');const cls=c?'ocupada':'livre';const st=c?'Ocupada':'Livre';return`<div class="mesa-card ${cls}" onclick="selectMesa(${m.id})"><span class="mesa-icon">🪑</span><div class="mesa-numero">${m.n}</div><div class="mesa-status"><span class="mesa-status-dot"></span>${st}</div></div>`}).join('')}
+function selectMesa(id){curMesa=id;let c=comandas.find(x=>x.mesaId===id&&x.status==='ABERTA');if(!c){cCounter++;c={id:cCounter,numero:cCounter,mesaId:id,status:'ABERTA',itens:[]};comandas.push(c);showToast(`✅ Comanda #${c.numero} aberta — Mesa ${id}`)}else showToast(`📋 Comanda #${c.numero} — Mesa ${id}`,'warning');goToProducts()}
+function selectPlataforma(p){curPlat=p;document.querySelectorAll('.plataforma-card').forEach(c=>c.classList.remove('selected'));event.currentTarget.classList.add('selected');setTimeout(()=>goToProducts(),200)}
+function goToProducts(){const l={BALCAO:'🏪 Balcão',MESA:'🪑 Mesa '+(curMesa||''),VIAGEM:'🛍️ Viagem',DELIVERY:'🛵 '+(curPlat||'Delivery')};document.getElementById('breadcrumb-mod').textContent=l[curMod]||'Produtos';cart=[];renderCart();renderProdutos();showStep('step-produtos')}
+function goBackToModalidade(){curMod=null;curMesa=null;curPlat=null;cart=[];showStep('step-modalidade');document.querySelectorAll('.modalidade-card').forEach(c=>c.classList.remove('selected'))}
+
+// CATEGORIAS
+function renderCategorias(){const b=document.getElementById('categorias-bar');let h=`<div class="categoria-chip active" onclick="filterCat(null,this)">🍽️ Todos</div>`;CATEGORIAS.forEach(c=>{h+=`<div class="categoria-chip" onclick="filterCat(${c.id},this)">${c.emoji} ${c.nome}</div>`});b.innerHTML=h}
+function filterCat(id,el){curCat=id;document.querySelectorAll('.categoria-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderProdutos()}
+function searchProducts(val){searchTerm=val.toLowerCase();renderProdutos()}
+
+// PRODUTOS
+function renderProdutos(){const g=document.getElementById('produtos-grid');let prods=PRODUTOS;if(curCat)prods=prods.filter(p=>p.catId===curCat);if(searchTerm)prods=prods.filter(p=>p.nome.toLowerCase().includes(searchTerm));g.innerHTML=prods.map(p=>{const ci=cart.find(c=>c.pid===p.id);const q=ci?ci.qtd:0;const ac=q>0?'added':'';const badge=q>0?`<span class="produto-qtd-badge">${q}</span>`:'';return`<div class="produto-card ${ac}" onclick="addToCart(${p.id})">${badge}<span class="produto-emoji">${p.emoji}</span><div class="produto-nome">${p.nome}</div><div class="produto-preco">R$ ${p.preco.toFixed(2).replace('.',',')}</div></div>`}).join('')}
+
+// CART
+function addToCart(pid){const e=cart.find(c=>c.pid===pid);if(e)e.qtd++;else cart.push({pid,qtd:1});renderCart();renderProdutos()}
+function changeQtd(pid,d){const i=cart.find(c=>c.pid===pid);if(!i)return;i.qtd+=d;if(i.qtd<=0)cart=cart.filter(c=>c.pid!==pid);renderCart();renderProdutos()}
+function renderCart(){const cont=document.getElementById('cart-items-container'),count=document.getElementById('cart-count'),sub=document.getElementById('cart-subtotal'),tot=document.getElementById('cart-total'),btn=document.getElementById('btn-confirmar');
+  const ti=cart.reduce((s,c)=>s+c.qtd,0);count.textContent=ti;
+  document.getElementById('tabPedidosCount').textContent=pedidos.length;
+  document.getElementById('tabCozinhaCount').textContent=pedidos.filter(p=>['ABERTO','EM_PREPARO'].includes(p.status)).length;
+  if(!cart.length){cont.innerHTML=`<div class="cart-empty"><span class="cart-empty-icon">🛒</span>Toque nos produtos para adicionar</div>`;sub.textContent=tot.textContent='R$ 0,00';btn.disabled=true;return}
+  btn.disabled=false;let total=0,html='<div class="cart-items">';
+  cart.forEach(c=>{const p=PRODUTOS.find(x=>x.id===c.pid);const st=p.preco*c.qtd;total+=st;
+    html+=`<div class="cart-item"><span class="cart-item-emoji">${p.emoji}</span><div class="cart-item-info"><div class="cart-item-name">${p.nome}</div><div class="cart-item-price">R$ ${st.toFixed(2).replace('.',',')} (${c.qtd}x R$ ${p.preco.toFixed(2).replace('.',',')})</div></div><div class="cart-item-qtd"><button class="qtd-btn minus" onclick="event.stopPropagation();changeQtd(${p.id},-1)">−</button><span class="qtd-num">${c.qtd}</span><button class="qtd-btn" onclick="event.stopPropagation();changeQtd(${p.id},1)">+</button></div></div>`});
+  html+='</div>';cont.innerHTML=html;const v='R$ '+total.toFixed(2).replace('.',',');sub.textContent=v;tot.textContent=v}
+
+// CONFIRMAR
+function confirmarPedido(){if(!cart.length)return;pCounter++;const n=pCounter,now=new Date();
+  const itens=cart.map(c=>{const p=PRODUTOS.find(x=>x.id===c.pid);return{pid:p.id,nome:p.nome,emoji:p.emoji,qtd:c.qtd,preco:p.preco,dataAdicao:now}});
+  const total=itens.reduce((s,i)=>s+i.preco*i.qtd,0);
+  const ped={id:pCounter,numero:n,mod:curMod,status:'ABERTO',mesaId:curMesa,plat:curPlat,dataAbertura:now,itens,total};pedidos.push(ped);
+  if(curMod==='MESA'&&curMesa){const co=comandas.find(c=>c.mesaId===curMesa&&c.status==='ABERTA');if(co)co.itens.push(...itens.map(i=>({...i,pedNum:n})))}
+  const btn=document.getElementById('btn-confirmar');btn.classList.add('success');btn.textContent='✅ Pedido #'+String(n).padStart(3,'0')+' enviado!';
+  showToast(`✅ Pedido #${String(n).padStart(3,'0')} enviado para a cozinha!`);
+  setTimeout(()=>{btn.classList.remove('success');btn.textContent='✅ Enviar para Cozinha';resetPedidoFlow()},2000)}
+
+// PEDIDOS PAGE
+function renderPedidosPage(){renderStats();const l=document.getElementById('pedidos-list');
+  if(!pedidos.length){l.innerHTML=`<div style="text-align:center;padding:60px;color:var(--gray-400)"><div style="font-size:48px;margin-bottom:12px">📋</div>Nenhum pedido registrado</div>`;return}
+  const ml={BALCAO:'Balcão',MESA:'Mesa',VIAGEM:'Viagem',DELIVERY:'Delivery'};
+  const sl={ABERTO:'Aberto',EM_PREPARO:'Em Preparo',PRONTO:'Pronto',ENTREGUE:'Entregue',FINALIZADO:'Finalizado',CANCELADO:'Cancelado'};
+  l.innerHTML=[...pedidos].reverse().map(p=>{const h=p.dataAbertura.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    return`<div class="pedido-row"><div class="pedido-numero">#${String(p.numero).padStart(3,'0')}</div><span class="pedido-tipo-badge tipo-${p.mod.toLowerCase()}">${ml[p.mod]}</span><div class="pedido-itens-resumo">${p.itens.map(i=>`${i.qtd}x ${i.nome}`).join(', ')} <span style="color:var(--gray-400)">• ${h}</span></div><div class="pedido-valor">R$ ${p.total.toFixed(2).replace('.',',')}</div><span class="pedido-status-badge status-${p.status.toLowerCase()}">${sl[p.status]}</span></div>`}).join('')}
+function renderStats(){const b=document.getElementById('stats-bar');const a=pedidos.filter(p=>p.status==='ABERTO').length,ep=pedidos.filter(p=>p.status==='EM_PREPARO').length,pr=pedidos.filter(p=>p.status==='PRONTO').length,tv=pedidos.filter(p=>p.status!=='CANCELADO').reduce((s,p)=>s+p.total,0);
+  b.innerHTML=`<div class="stat-card"><div class="stat-icon orders">📋</div><div><div class="stat-value">${pedidos.length}</div><div class="stat-label">Pedidos hoje</div></div></div><div class="stat-card"><div class="stat-icon preparing">🔥</div><div><div class="stat-value">${a+ep}</div><div class="stat-label">Na cozinha</div></div></div><div class="stat-card"><div class="stat-icon ready">✅</div><div><div class="stat-value">${pr}</div><div class="stat-label">Prontos</div></div></div><div class="stat-card"><div class="stat-icon revenue">💰</div><div><div class="stat-value">R$ ${tv.toFixed(0)}</div><div class="stat-label">Vendas</div></div></div>`}
+
+// COZINHA
+function renderCozinhaPage(){const aw=pedidos.filter(p=>p.status==='ABERTO'),pr=pedidos.filter(p=>p.status==='EM_PREPARO');
+  document.getElementById('count-aguardando').textContent=aw.length;document.getElementById('count-preparando').textContent=pr.length;
+  const ml={BALCAO:'Balcão',MESA:'Mesa',VIAGEM:'Viagem',DELIVERY:'Delivery'};
+  function card(p,isPr){const m=Math.floor((Date.now()-p.dataAbertura.getTime())/60000);const u=m>10;const mi=p.mod==='MESA'?` • Mesa ${p.mesaId}`:'';
+    return`<div class="cozinha-card ${isPr?'preparando':''}" id="ccard-${p.id}"><div class="cozinha-card-top"><span class="cozinha-card-numero">#${String(p.numero).padStart(3,'0')}</span><span class="cozinha-card-tipo tipo-${p.mod.toLowerCase()}">${ml[p.mod]}${mi}</span></div><div class="cozinha-card-itens">${p.itens.map(i=>`<div class="cozinha-card-item"><span class="cozinha-card-item-qtd">${i.qtd}x</span>${i.emoji} ${i.nome}</div>`).join('')}</div><div class="cozinha-card-bottom"><span class="cozinha-timer ${u?'urgente':'normal'}" data-s="${p.dataAbertura.getTime()}">⏱ ${m} min</span>${isPr?`<button class="cozinha-btn concluir" onclick="cozAction(${p.id},'PRONTO')">✅ Concluir</button>`:`<button class="cozinha-btn iniciar" onclick="cozAction(${p.id},'EM_PREPARO')">🔥 Iniciar</button>`}</div></div>`}
+  document.getElementById('fila-aguardando').innerHTML=aw.length?aw.map(p=>card(p,false)).join(''):`<div style="text-align:center;padding:40px;color:var(--gray-400)">⏳ Nenhum pedido aguardando</div>`;
+  document.getElementById('fila-preparando').innerHTML=pr.length?pr.map(p=>card(p,true)).join(''):`<div style="text-align:center;padding:40px;color:var(--gray-400)">🔥 Nenhum em preparo</div>`}
+function cozAction(id,ns){const p=pedidos.find(x=>x.id===id);if(!p)return;const c=document.getElementById('ccard-'+id);if(c){c.style.transform='translateX(100px)';c.style.opacity='0'}
+  setTimeout(()=>{p.status=ns;if(ns==='PRONTO'){showToast(`✅ #${String(p.numero).padStart(3,'0')} PRONTO!`);setTimeout(()=>{p.status='ENTREGUE';renderCozinhaPage()},5000)}else showToast(`🔥 #${String(p.numero).padStart(3,'0')} em preparo`,'warning');renderCozinhaPage()},300)}
+function startTimers(){setInterval(()=>{document.querySelectorAll('.cozinha-timer[data-s]').forEach(el=>{const m=Math.floor((Date.now()-parseInt(el.dataset.s))/60000);el.textContent=`⏱ ${m} min`;if(m>10){el.classList.add('urgente');el.classList.remove('normal')}})},10000)}
+
+// MESAS
+function renderMesasPage(){const g=document.getElementById('mesas-grid');g.innerHTML=MESAS.map(m=>{
+  const co=comandas.find(c=>c.mesaId===m.id&&c.status==='ABERTA');const fe=comandas.find(c=>c.mesaId===m.id&&c.status==='FECHADA');
+  let cls='livre',st='Livre',vh='';
+  if(co){cls='ocupada';st='Ocupada';const t=co.itens.reduce((s,i)=>s+i.preco*i.qtd,0);vh=`<div class="mesa-valor">R$ ${t.toFixed(2).replace('.',',')}</div>`}else if(fe){cls='aguardando';st='Aguardando Pgto'}
+  return`<div class="mesa-card ${cls}" onclick="openComandaModal(${m.id})"><span class="mesa-icon">🪑</span><div class="mesa-numero">${m.n}</div><div class="mesa-status"><span class="mesa-status-dot"></span>${st}</div>${vh}</div>`}).join('')}
+
+// COMANDA MODAL
+function openComandaModal(mid){const co=comandas.find(c=>c.mesaId===mid&&(c.status==='ABERTA'||c.status==='FECHADA'));if(!co){showToast('Mesa livre — abra pedido de mesa','warning');return}
+  document.getElementById('modal-comanda-title').textContent=`Comanda #${co.numero} — Mesa ${mid}`;
+  const tot=co.itens.reduce((s,i)=>s+i.preco*i.qtd,0);
+  let h=`<div class="comanda-header-bar"><div class="comanda-info"><span class="comanda-num">#${co.numero}</span><span class="comanda-mesa">Mesa ${mid}</span></div><span class="comanda-status-pill">${co.status}</span></div>`;
+  co.itens.forEach(i=>{const hr=i.dataAdicao.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});h+=`<div class="comanda-item-row"><span class="comanda-item-hora">${hr}</span><span>${i.emoji}</span><span class="comanda-item-nome">${i.nome}</span><span class="comanda-item-qtd">${i.qtd}x</span><span class="comanda-item-valor">R$ ${(i.preco*i.qtd).toFixed(2).replace('.',',')}</span></div>`});
+  h+=`<div class="cart-total" style="margin-top:16px;padding-top:12px;border-top:2px solid var(--gray-200)"><span>Total</span><span class="cart-total-value" style="font-size:20px">R$ ${tot.toFixed(2).replace('.',',')}</span></div>`;
+  document.getElementById('modal-comanda-body').innerHTML=h;document.getElementById('modal-comanda').dataset.mid=mid;openModal('modal-comanda')}
+function fecharComandaModal(){const mid=parseInt(document.getElementById('modal-comanda').dataset.mid);const co=comandas.find(c=>c.mesaId===mid&&c.status==='ABERTA');if(co){co.status='FECHADA';showToast(`🧾 Comanda #${co.numero} fechada`)}closeModal('modal-comanda');renderMesasPage()}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+
+// TOAST
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const icons={success:'✅',warning:'⚠️',error:'❌'};const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span class="toast-icon">${icons[type]}</span><span class="toast-msg">${msg}</span>`;c.appendChild(t);setTimeout(()=>t.remove(),3200)}
+
+// SAMPLE DATA
+function generateSampleData(){
+  pCounter++;pedidos.push({id:pCounter,numero:pCounter,mod:'BALCAO',status:'FINALIZADO',mesaId:null,plat:null,dataAbertura:new Date(Date.now()-3600000),itens:[{pid:1,nome:'Pão Francês',emoji:'🥖',qtd:10,preco:.75,dataAdicao:new Date(Date.now()-3600000)},{pid:13,nome:'Café',emoji:'☕',qtd:1,preco:4,dataAdicao:new Date(Date.now()-3600000)}],total:11.5});
+  pCounter++;pedidos.push({id:pCounter,numero:pCounter,mod:'DELIVERY',status:'EM_PREPARO',mesaId:null,plat:'iFood',dataAbertura:new Date(Date.now()-900000),itens:[{pid:19,nome:'X-Salada',emoji:'🍔',qtd:2,preco:14,dataAdicao:new Date(Date.now()-900000)},{pid:15,nome:'Refrigerante',emoji:'🥤',qtd:2,preco:6,dataAdicao:new Date(Date.now()-900000)}],total:40});
+  pCounter++;cCounter++;comandas.push({id:cCounter,numero:cCounter,mesaId:3,status:'ABERTA',itens:[{pid:17,nome:'Misto Quente',emoji:'🥪',qtd:1,preco:8,dataAdicao:new Date(Date.now()-1800000),pedNum:pCounter},{pid:13,nome:'Café',emoji:'☕',qtd:2,preco:4,dataAdicao:new Date(Date.now()-1800000),pedNum:pCounter},{pid:9,nome:'Bolo Chocolate',emoji:'🍫',qtd:1,preco:8,dataAdicao:new Date(Date.now()-600000),pedNum:pCounter}]});
+  pedidos.push({id:pCounter,numero:pCounter,mod:'MESA',status:'ABERTO',mesaId:3,plat:null,dataAbertura:new Date(Date.now()-300000),itens:comandas[0].itens.slice(0,2),total:16});
+  pCounter++;pedidos.push({id:pCounter,numero:pCounter,mod:'VIAGEM',status:'ABERTO',mesaId:null,plat:null,dataAbertura:new Date(Date.now()-120000),itens:[{pid:5,nome:'Coxinha',emoji:'🍗',qtd:4,preco:6,dataAdicao:new Date(Date.now()-120000)},{pid:6,nome:'Pastel',emoji:'🥟',qtd:3,preco:7,dataAdicao:new Date(Date.now()-120000)}],total:45});
+}
+
+document.addEventListener('DOMContentLoaded',init);
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')})});
+</script>
+</body>
+</html>

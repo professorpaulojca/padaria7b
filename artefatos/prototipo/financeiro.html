@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padaria — Financeiro</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#E8722A;--primary-dark:#C45D1E;--primary-light:#FCEEE4;
+  --secondary:#2D6A4F;--secondary-light:#D8F3DC;
+  --accent:#3A86FF;--accent-light:#E8F0FE;
+  --danger:#E63946;--danger-light:#FFE0E3;
+  --warning:#F4A261;--warning-light:#FFF3E0;
+  --success:#2D6A4F;--success-light:#D8F3DC;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;
+  --gray-800:#1F2937;--gray-900:#111827;
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+  --shadow-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);
+  --transition:.2s ease;--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--font);background:var(--gray-100);color:var(--gray-800);line-height:1.5}
+.app{display:flex;min-height:100vh}
+.sidebar{width:72px;background:var(--gray-900);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:0}
+.sidebar-logo{width:44px;height:44px;background:var(--primary);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;cursor:pointer}
+.sidebar-divider{width:36px;height:1px;background:var(--gray-700);margin:6px 0;flex-shrink:0}
+.sidebar-item{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gray-400);cursor:pointer;transition:all var(--transition);position:relative;flex-shrink:0}
+.sidebar-item:hover{background:var(--gray-700);color:#fff}
+.sidebar-item.active{background:var(--primary);color:#fff}
+.sidebar-item .tooltip{position:absolute;left:60px;background:var(--gray-800);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--transition);z-index:200}
+.sidebar-item:hover .tooltip{opacity:1}
+.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px;align-items:center;padding-top:8px}
+.main{margin-left:72px;flex:1;display:flex;flex-direction:column}
+.header{background:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:50}
+.header-title{font-size:18px;font-weight:700;color:var(--gray-900)}
+.header-subtitle{font-size:13px;color:var(--gray-500)}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-badge{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;background:var(--primary-light);color:var(--primary)}
+.header-user{width:36px;height:36px;border-radius:50%;background:var(--secondary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.content{padding:24px;flex:1}
+.hidden{display:none !important}
+.tabs-bar{display:flex;gap:4px;background:#fff;padding:4px;border-radius:var(--radius);margin-bottom:20px;box-shadow:var(--shadow);flex-wrap:wrap}
+.tab-btn{padding:10px 16px;border:none;border-radius:var(--radius-sm);background:transparent;font-size:13px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all var(--transition);font-family:var(--font);display:flex;align-items:center;gap:6px}
+.tab-btn:hover{background:var(--gray-100)}
+.tab-btn.active{background:var(--primary);color:#fff;box-shadow:var(--shadow-md)}
+.tab-btn .badge{padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700}
+.tab-btn.active .badge{background:rgba(255,255,255,.3)}
+.tab-btn:not(.active) .badge{background:var(--gray-200);color:var(--gray-600)}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.stat-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px}
+.stat-value{font-size:22px;font-weight:800;color:var(--gray-900)}
+.stat-label{font-size:12px;color:var(--gray-500)}
+
+/* TABLE */
+.table-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}
+.table-header h3{font-size:15px;font-weight:700}
+.table-actions{display:flex;gap:8px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--gray-50);padding:10px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;border-bottom:1px solid var(--gray-200)}
+td{padding:12px 16px;border-bottom:1px solid var(--gray-100);font-size:14px}
+tr:hover{background:var(--gray-50)}
+.status-pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;display:inline-block}
+.status-pago{background:var(--success-light);color:var(--success)}
+.status-pendente{background:var(--warning-light);color:var(--warning)}
+.status-vencido{background:var(--danger-light);color:var(--danger)}
+.status-registrado{background:var(--accent-light);color:var(--accent)}
+.status-gerado{background:var(--primary-light);color:var(--primary)}
+.status-processado{background:var(--success-light);color:var(--success)}
+
+/* BTN */
+.btn{padding:10px 18px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:var(--font);display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:var(--secondary);color:#fff}.btn-secondary:hover{background:#1B5E3C}
+.btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:#2E73E0}
+.btn-outline{background:#fff;border:2px solid var(--gray-200);color:var(--gray-600)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+.form-input{width:100%;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);outline:none;transition:border var(--transition)}
+.form-input:focus{border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* FIADO */
+.fiado-card{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;border-left:4px solid var(--warning);cursor:pointer;transition:all .2s;margin-bottom:10px}
+.fiado-card:hover{box-shadow:var(--shadow-md);transform:translateX(4px)}
+.fiado-avatar{width:44px;height:44px;border-radius:50%;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--gray-600)}
+.fiado-info{flex:1}
+.fiado-nome{font-weight:700;font-size:15px}
+.fiado-detail{font-size:12px;color:var(--gray-500)}
+.fiado-valor{font-size:18px;font-weight:800;color:var(--danger)}
+.fiado-dias{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700}
+.fiado-dias.normal{background:var(--warning-light);color:var(--warning)}
+.fiado-dias.vencido{background:var(--danger-light);color:var(--danger)}
+
+/* BOLETO */
+.boleto-card{background:#fff;border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow);border-left:4px solid var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:14px}
+.boleto-icon{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:20px}
+.boleto-info{flex:1}
+.boleto-numero{font-weight:700;font-size:14px}.boleto-cliente{font-size:13px;color:var(--gray-500)}
+.boleto-valor{font-weight:800;font-size:16px;color:var(--primary);min-width:100px;text-align:right}
+.boleto-status{min-width:90px;text-align:center}
+.boleto-actions{display:flex;gap:6px}
+
+/* DRE */
+.dre-section{margin-bottom:20px}
+.dre-header{font-size:14px;font-weight:700;padding:10px 16px;background:var(--gray-50);border-radius:var(--radius-sm) var(--radius-sm) 0 0;border-bottom:2px solid var(--gray-200)}
+.dre-row{display:flex;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--gray-100);background:#fff;font-size:14px}
+.dre-row:last-child{border:none}
+.dre-row span:first-child{color:var(--gray-600)}
+.dre-row span:last-child{font-weight:700}
+.dre-total{display:flex;justify-content:space-between;padding:14px 16px;font-weight:800;font-size:16px;border-top:2px solid var(--gray-800);background:#fff}
+.dre-total.positivo span:last-child{color:var(--success)}.dre-total.negativo span:last-child{color:var(--danger)}
+
+/* FLUXO CAIXA */
+.fluxo-chart{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+.fluxo-day{background:#fff;border-radius:var(--radius-sm);padding:12px;text-align:center;box-shadow:var(--shadow)}
+.fluxo-day-label{font-size:11px;color:var(--gray-400);font-weight:700;text-transform:uppercase}
+.fluxo-day-bar{height:80px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;margin:8px 0}
+.fluxo-bar{width:28px;border-radius:4px 4px 0 0;min-height:4px;transition:height .5s ease}
+.fluxo-bar.entrada{background:var(--success)}.fluxo-bar.saida{background:var(--danger)}
+.fluxo-day-val{font-size:12px;font-weight:700}
+.fluxo-day-val.pos{color:var(--success)}.fluxo-day-val.neg{color:var(--danger)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:var(--radius-lg);width:90%;max-width:600px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);transform:translateY(20px) scale(.95);transition:transform .3s}
+.modal-overlay.show .modal{transform:translateY(0) scale(1)}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:18px;font-weight:700}
+.modal-close{width:32px;height:32px;border:none;background:var(--gray-100);border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--gray-200)}
+.modal-body{padding:20px 24px}.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;gap:10px;justify-content:flex-end}
+
+/* TOAST */
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{background:#fff;border-radius:var(--radius);padding:14px 20px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:280px;animation:toastIn .4s ease,toastOut .4s ease 2.6s forwards;border-left:4px solid var(--success)}
+.toast.warning{border-left-color:var(--warning)}.toast.error{border-left-color:var(--danger)}
+
+@keyframes toastIn{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(60px)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .5s ease}.slide-in{animation:slideIn .4s ease}
+
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.fluxo-chart{grid-template-columns:repeat(4,1fr)}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo" onclick="location.href='login-dashboard.html'">🍞</div>
+    <div class="sidebar-item" onclick="location.href='atendimento.html'">➕<span class="tooltip">Pedidos</span></div>
+    <div class="sidebar-item" onclick="location.href='caixa.html'">💰<span class="tooltip">Caixa</span></div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item active">💵<span class="tooltip">Financeiro</span></div>
+    <div class="sidebar-item" onclick="location.href='estoque.html'">📦<span class="tooltip">Estoque</span></div>
+    <div class="sidebar-item" onclick="location.href='cadastros.html'">👥<span class="tooltip">Cadastros</span></div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-item" onclick="location.href='configuracoes.html'">⚙️<span class="tooltip">Config</span></div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="header">
+      <div><div class="header-title">💵 Financeiro</div><div class="header-subtitle">Contas, boletos e relatórios financeiros</div></div>
+      <div class="header-right"><span class="header-badge" id="dateBadge"></span><div class="header-user">AD</div></div>
+    </header>
+
+    <div class="content">
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="showTab('pagar')">📤 Contas a Pagar <span class="badge" id="badge-pagar">5</span></button>
+        <button class="tab-btn" onclick="showTab('receber')">📥 Contas a Receber <span class="badge" id="badge-receber">3</span></button>
+        <button class="tab-btn" onclick="showTab('fiado')">📝 Fiado <span class="badge" id="badge-fiado">4</span></button>
+        <button class="tab-btn" onclick="showTab('boletos')">🏦 Boletos Bradesco</button>
+        <button class="tab-btn" onclick="showTab('dre')">📊 DRE</button>
+        <button class="tab-btn" onclick="showTab('fluxo')">📈 Fluxo de Caixa</button>
+      </div>
+
+      <!-- CONTAS A PAGAR -->
+      <div id="tab-pagar" class="tab-content fade-in">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:#FFE0E3">📤</div><div><div class="stat-value">R$ 12.450</div><div class="stat-label">Total a Pagar</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">⚠️</div><div><div class="stat-value">R$ 3.200</div><div class="stat-label">Vencido</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light)">📅</div><div><div class="stat-value">R$ 5.800</div><div class="stat-label">Vencendo 7 dias</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--success-light)">✅</div><div><div class="stat-value">R$ 28.900</div><div class="stat-label">Pago (mês)</div></div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>📤 Contas a Pagar</h3><div class="table-actions"><button class="btn btn-outline btn-sm">📥 Importar</button><button class="btn btn-primary btn-sm" onclick="openModal('modal-conta-pagar')">+ Nova Conta</button></div></div>
+          <table>
+            <thead><tr><th>Nº</th><th>Fornecedor</th><th>Descrição</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody>
+              <tr><td>CP-001</td><td>Moinho Real</td><td>Farinha de Trigo 50kg x20</td><td>15/01/2025</td><td style="font-weight:700">R$ 2.800,00</td><td><span class="status-pill status-vencido">Vencido</span></td><td><button class="btn btn-sm btn-secondary" onclick="showToast('✅ Pagamento registrado')">Pagar</button></td></tr>
+              <tr><td>CP-002</td><td>Laticínios São João</td><td>Queijo, Manteiga, Leite</td><td>20/01/2025</td><td style="font-weight:700">R$ 1.650,00</td><td><span class="status-pill status-pendente">Pendente</span></td><td><button class="btn btn-sm btn-secondary" onclick="showToast('✅ Pagamento registrado')">Pagar</button></td></tr>
+              <tr><td>CP-003</td><td>Distribuidora ABC</td><td>Embalagens, descartáveis</td><td>22/01/2025</td><td style="font-weight:700">R$ 890,00</td><td><span class="status-pill status-pendente">Pendente</span></td><td><button class="btn btn-sm btn-secondary" onclick="showToast('✅ Pagamento registrado')">Pagar</button></td></tr>
+              <tr><td>CP-004</td><td>CEMIG</td><td>Energia elétrica</td><td>25/01/2025</td><td style="font-weight:700">R$ 2.300,00</td><td><span class="status-pill status-pendente">Pendente</span></td><td><button class="btn btn-sm btn-secondary" onclick="showToast('✅ Pagamento registrado')">Pagar</button></td></tr>
+              <tr><td>CP-005</td><td>Aluguel</td><td>Aluguel jan/2025</td><td>05/01/2025</td><td style="font-weight:700">R$ 4.500,00</td><td><span class="status-pill status-pago">Pago</span></td><td><button class="btn btn-sm btn-outline">🧾 Recibo</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONTAS A RECEBER -->
+      <div id="tab-receber" class="tab-content hidden fade-in">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--success-light)">📥</div><div><div class="stat-value">R$ 8.750</div><div class="stat-label">Total a Receber</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">⚠️</div><div><div class="stat-value">R$ 1.200</div><div class="stat-label">Vencido</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light)">📝</div><div><div class="stat-value">R$ 3.450</div><div class="stat-label">Fiado (total)</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#EBF5FB">🏦</div><div><div class="stat-value">R$ 5.300</div><div class="stat-label">Boletos emitidos</div></div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>📥 Contas a Receber</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-conta-receber')">+ Nova Conta</button></div>
+          <table>
+            <thead><tr><th>Nº</th><th>Cliente</th><th>Origem</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody>
+              <tr><td>CR-001</td><td>Restaurante Bom Sabor</td><td>Venda por encomenda</td><td>15/01/2025</td><td style="font-weight:700">R$ 3.200,00</td><td><span class="status-pill status-pendente">Pendente</span></td><td><button class="btn btn-sm btn-secondary" onclick="showToast('✅ Recebimento registrado')">Receber</button></td></tr>
+              <tr><td>CR-002</td><td>João Silva (Fiado)</td><td>Fiado — 12 compras</td><td>10/01/2025</td><td style="font-weight:700">R$ 450,00</td><td><span class="status-pill status-vencido">Vencido</span></td><td><button class="btn btn-sm btn-accent">🏦 Boleto</button></td></tr>
+              <tr><td>CR-003</td><td>Maria Oliveira (Fiado)</td><td>Fiado — 8 compras</td><td>20/01/2025</td><td style="font-weight:700">R$ 280,00</td><td><span class="status-pill status-pendente">Pendente</span></td><td><button class="btn btn-sm btn-secondary" onclick="showToast('✅ Recebimento registrado')">Receber</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FIADO -->
+      <div id="tab-fiado" class="tab-content hidden fade-in">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light)">📝</div><div><div class="stat-value">4</div><div class="stat-label">Clientes c/ fiado</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">💰</div><div><div class="stat-value">R$ 3.450</div><div class="stat-label">Total em aberto</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">⚠️</div><div><div class="stat-value">2</div><div class="stat-label">Vencidos</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--success-light)">✅</div><div><div class="stat-value">R$ 8.200</div><div class="stat-label">Recebido (mês)</div></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h3 style="font-size:15px;font-weight:700">📝 Clientes no Fiado</h3><button class="btn btn-accent btn-sm" onclick="showToast('🏦 Gerando boletos em lote...')">🏦 Gerar Boletos em Lote</button></div>
+        <div id="fiado-list">
+          <div class="fiado-card" onclick="openModal('modal-fiado-detalhe')"><div class="fiado-avatar">JS</div><div class="fiado-info"><div class="fiado-nome">João Silva</div><div class="fiado-detail">CPF: xxx.xxx.xxx-01 • 12 compras • Desde 01/12/2024</div></div><div style="text-align:right"><div class="fiado-valor">R$ 1.450,00</div><span class="fiado-dias vencido">15 dias vencido</span></div></div>
+          <div class="fiado-card"><div class="fiado-avatar">MO</div><div class="fiado-info"><div class="fiado-nome">Maria Oliveira</div><div class="fiado-detail">CPF: xxx.xxx.xxx-02 • 8 compras • Desde 05/12/2024</div></div><div style="text-align:right"><div class="fiado-valor">R$ 780,00</div><span class="fiado-dias normal">5 dias p/ vencer</span></div></div>
+          <div class="fiado-card"><div class="fiado-avatar">PS</div><div class="fiado-info"><div class="fiado-nome">Pedro Santos</div><div class="fiado-detail">CPF: xxx.xxx.xxx-03 • 5 compras • Desde 10/12/2024</div></div><div style="text-align:right"><div class="fiado-valor">R$ 520,00</div><span class="fiado-dias normal">12 dias p/ vencer</span></div></div>
+          <div class="fiado-card"><div class="fiado-avatar">AF</div><div class="fiado-info"><div class="fiado-nome">Ana Ferreira</div><div class="fiado-detail">CPF: xxx.xxx.xxx-04 • 3 compras • Desde 15/12/2024</div></div><div style="text-align:right"><div class="fiado-valor">R$ 700,00</div><span class="fiado-dias vencido">2 dias vencido</span></div></div>
+        </div>
+      </div>
+
+      <!-- BOLETOS BRADESCO -->
+      <div id="tab-boletos" class="tab-content hidden fade-in">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--accent-light)">🏦</div><div><div class="stat-value">8</div><div class="stat-label">Boletos emitidos</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light)">⏳</div><div><div class="stat-value">5</div><div class="stat-label">Aguardando pgto</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--success-light)">✅</div><div><div class="stat-value">R$ 2.800</div><div class="stat-label">Pagos</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">❌</div><div><div class="stat-value">1</div><div class="stat-label">Vencido</div></div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <button class="btn btn-accent" onclick="openModal('modal-gerar-boleto')">🏦 Gerar Boleto Individual</button>
+          <button class="btn btn-primary" onclick="showToast('📄 Gerando arquivo CNAB 400 remessa...');setTimeout(()=>showToast('✅ Arquivo remessa gerado: REM20250115.txt'),1500)">📤 Gerar Remessa CNAB 400</button>
+          <button class="btn btn-outline" onclick="openModal('modal-retorno')">📥 Importar Retorno</button>
+        </div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px">🏦 Boletos Emitidos — Bradesco Carteira 09</div>
+        <div id="boletos-list">
+          <div class="boleto-card"><div class="boleto-icon">🏦</div><div class="boleto-info"><div class="boleto-numero">Nosso Nº: 09/00000001-8 • Venc: 20/01/2025</div><div class="boleto-cliente">João Silva — Fiado (12 compras)</div></div><div class="boleto-valor">R$ 1.450,00</div><div class="boleto-status"><span class="status-pill status-registrado">Registrado</span></div><div class="boleto-actions"><button class="btn btn-sm btn-outline">👁️</button><button class="btn btn-sm btn-outline">🖨️</button></div></div>
+          <div class="boleto-card"><div class="boleto-icon">🏦</div><div class="boleto-info"><div class="boleto-numero">Nosso Nº: 09/00000002-6 • Venc: 20/01/2025</div><div class="boleto-cliente">Maria Oliveira — Fiado (8 compras)</div></div><div class="boleto-valor">R$ 780,00</div><div class="boleto-status"><span class="status-pill status-registrado">Registrado</span></div><div class="boleto-actions"><button class="btn btn-sm btn-outline">👁️</button><button class="btn btn-sm btn-outline">🖨️</button></div></div>
+          <div class="boleto-card"><div class="boleto-icon">🏦</div><div class="boleto-info"><div class="boleto-numero">Nosso Nº: 09/00000003-4 • Venc: 15/01/2025</div><div class="boleto-cliente">Restaurante Bom Sabor — Encomenda</div></div><div class="boleto-valor">R$ 3.200,00</div><div class="boleto-status"><span class="status-pill status-pendente">Pendente</span></div><div class="boleto-actions"><button class="btn btn-sm btn-outline">👁️</button><button class="btn btn-sm btn-outline">🖨️</button></div></div>
+          <div class="boleto-card"><div class="boleto-icon">✅</div><div class="boleto-info"><div class="boleto-numero">Nosso Nº: 09/00000004-2 • Venc: 10/01/2025</div><div class="boleto-cliente">Pedro Santos — Fiado acumulado</div></div><div class="boleto-valor">R$ 520,00</div><div class="boleto-status"><span class="status-pill status-pago">Pago</span></div><div class="boleto-actions"><button class="btn btn-sm btn-outline">👁️</button></div></div>
+          <div class="boleto-card" style="border-left-color:var(--danger)"><div class="boleto-icon" style="background:var(--danger-light)">⚠️</div><div class="boleto-info"><div class="boleto-numero">Nosso Nº: 09/00000005-0 • Venc: 05/01/2025</div><div class="boleto-cliente">Ana Ferreira — Fiado (3 compras)</div></div><div class="boleto-valor">R$ 700,00</div><div class="boleto-status"><span class="status-pill status-vencido">Vencido</span></div><div class="boleto-actions"><button class="btn btn-sm btn-outline">👁️</button><button class="btn btn-sm btn-danger">Protestar</button></div></div>
+        </div>
+        <div class="table-card" style="margin-top:20px">
+          <div class="table-header"><h3>📄 Arquivos de Remessa / Retorno</h3></div>
+          <table>
+            <thead><tr><th>Arquivo</th><th>Tipo</th><th>Data</th><th>Registros</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>REM20250115_001.txt</td><td>Remessa</td><td>15/01/2025 08:30</td><td>5 boletos</td><td><span class="status-pill status-processado">Enviado</span></td></tr>
+              <tr><td>RET20250114_001.txt</td><td>Retorno</td><td>14/01/2025 16:00</td><td>2 baixas</td><td><span class="status-pill status-pago">Processado</span></td></tr>
+              <tr><td>REM20250110_001.txt</td><td>Remessa</td><td>10/01/2025 09:15</td><td>3 boletos</td><td><span class="status-pill status-processado">Enviado</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DRE -->
+      <div id="tab-dre" class="tab-content hidden fade-in">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-weight:700">📊 DRE — Demonstrativo de Resultados</h3><div class="table-actions"><select class="form-input" style="width:auto;padding:8px"><option>Janeiro/2025</option><option>Dezembro/2024</option><option>Novembro/2024</option></select><button class="btn btn-outline btn-sm">📥 Exportar PDF</button></div></div>
+        <div style="background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+          <div class="dre-section"><div class="dre-header">💰 RECEITAS</div><div class="dre-row"><span>Vendas Balcão</span><span>R$ 32.500,00</span></div><div class="dre-row"><span>Vendas Mesa</span><span>R$ 18.200,00</span></div><div class="dre-row"><span>Delivery</span><span>R$ 8.400,00</span></div><div class="dre-row"><span>Encomendas</span><span>R$ 5.800,00</span></div><div class="dre-total positivo"><span>Total Receitas</span><span>R$ 64.900,00</span></div></div>
+          <div class="dre-section"><div class="dre-header">📦 CUSTOS (CMV)</div><div class="dre-row"><span>Matéria-prima (farinha, etc)</span><span>R$ 12.800,00</span></div><div class="dre-row"><span>Ingredientes perecíveis</span><span>R$ 6.400,00</span></div><div class="dre-row"><span>Embalagens</span><span>R$ 1.200,00</span></div><div class="dre-total negativo"><span>Total CMV</span><span>R$ 20.400,00</span></div></div>
+          <div class="dre-section"><div class="dre-header" style="background:var(--success-light);font-size:16px">LUCRO BRUTO</div><div class="dre-total positivo"><span>Receitas − CMV</span><span>R$ 44.500,00 (68,6%)</span></div></div>
+          <div class="dre-section"><div class="dre-header">💸 DESPESAS OPERACIONAIS</div><div class="dre-row"><span>Folha de pagamento</span><span>R$ 15.000,00</span></div><div class="dre-row"><span>Aluguel</span><span>R$ 4.500,00</span></div><div class="dre-row"><span>Energia elétrica</span><span>R$ 2.300,00</span></div><div class="dre-row"><span>Água + Gás</span><span>R$ 800,00</span></div><div class="dre-row"><span>Manutenção</span><span>R$ 500,00</span></div><div class="dre-row"><span>Marketing / Delivery</span><span>R$ 1.200,00</span></div><div class="dre-row"><span>Contador</span><span>R$ 800,00</span></div><div class="dre-row"><span>Outros</span><span>R$ 600,00</span></div><div class="dre-total negativo"><span>Total Despesas</span><span>R$ 25.700,00</span></div></div>
+          <div class="dre-section"><div class="dre-header" style="background:var(--primary-light);font-size:16px;font-weight:800">RESULTADO LÍQUIDO</div><div class="dre-total positivo" style="font-size:20px"><span>Lucro Líquido</span><span>R$ 18.800,00 (29,0%)</span></div></div>
+        </div>
+      </div>
+
+      <!-- FLUXO DE CAIXA -->
+      <div id="tab-fluxo" class="tab-content hidden fade-in">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-weight:700">📈 Fluxo de Caixa — Semana Atual</h3><div class="table-actions"><button class="btn btn-outline btn-sm">◄ Semana anterior</button><button class="btn btn-outline btn-sm">Próxima ►</button></div></div>
+        <div class="fluxo-chart" id="fluxo-chart"></div>
+        <div class="table-card">
+          <div class="table-header"><h3>📋 Detalhamento Diário</h3></div>
+          <table>
+            <thead><tr><th>Data</th><th>Entradas</th><th>Saídas</th><th>Saldo Dia</th><th>Saldo Acumulado</th></tr></thead>
+            <tbody id="fluxo-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-conta-pagar">
+  <div class="modal"><div class="modal-header"><h2>➕ Nova Conta a Pagar</h2><button class="modal-close" onclick="closeModal('modal-conta-pagar')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label>Fornecedor</label><select class="form-input"><option>Selecione...</option><option>Moinho Real</option><option>Laticínios São João</option><option>Distribuidora ABC</option><option>CEMIG</option></select></div><div class="form-group"><label>Categoria</label><select class="form-input"><option>Matéria-prima</option><option>Energia</option><option>Aluguel</option><option>Manutenção</option><option>Outros</option></select></div></div>
+      <div class="form-group"><label>Descrição</label><input class="form-input" placeholder="Descrição da conta"></div>
+      <div class="form-row"><div class="form-group"><label>Valor</label><input class="form-input" placeholder="R$ 0,00"></div><div class="form-group"><label>Vencimento</label><input class="form-input" type="date"></div></div>
+      <div class="form-group"><label>Parcelas</label><select class="form-input"><option>1x (à vista)</option><option>2x</option><option>3x</option><option>6x</option><option>12x</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-conta-pagar')">Cancelar</button><button class="btn btn-primary" onclick="closeModal('modal-conta-pagar');showToast('✅ Conta registrada')">💾 Salvar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-conta-receber">
+  <div class="modal"><div class="modal-header"><h2>➕ Nova Conta a Receber</h2><button class="modal-close" onclick="closeModal('modal-conta-receber')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label>Cliente</label><select class="form-input"><option>Selecione...</option><option>Restaurante Bom Sabor</option><option>João Silva</option><option>Maria Oliveira</option></select></div><div class="form-group"><label>Origem</label><select class="form-input"><option>Encomenda</option><option>Fiado</option><option>Boleto</option><option>Outros</option></select></div></div>
+      <div class="form-group"><label>Descrição</label><input class="form-input" placeholder="Descrição"></div>
+      <div class="form-row"><div class="form-group"><label>Valor</label><input class="form-input" placeholder="R$ 0,00"></div><div class="form-group"><label>Vencimento</label><input class="form-input" type="date"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-conta-receber')">Cancelar</button><button class="btn btn-primary" onclick="closeModal('modal-conta-receber');showToast('✅ Conta registrada')">💾 Salvar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-gerar-boleto">
+  <div class="modal"><div class="modal-header"><h2>🏦 Gerar Boleto Bradesco</h2><button class="modal-close" onclick="closeModal('modal-gerar-boleto')">✕</button></div>
+    <div class="modal-body">
+      <div style="padding:12px;background:var(--accent-light);border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px"><strong>Bradesco — Carteira 09</strong><br>Agência: 1234-5 • Conta: 0012345-6 • Convênio: 1234567</div>
+      <div class="form-group"><label>Sacado (Cliente)</label><select class="form-input"><option>Selecione...</option><option>João Silva — CPF xxx.xxx.xxx-01 — R$ 1.450,00 (fiado)</option><option>Maria Oliveira — CPF xxx.xxx.xxx-02 — R$ 780,00 (fiado)</option><option>Restaurante Bom Sabor — CNPJ xx.xxx.xxx/0001-00</option></select></div>
+      <div class="form-row"><div class="form-group"><label>Valor do Boleto</label><input class="form-input" placeholder="R$ 0,00"></div><div class="form-group"><label>Vencimento</label><input class="form-input" type="date"></div></div>
+      <div class="form-row"><div class="form-group"><label>Multa por atraso (%)</label><input class="form-input" value="2,00" placeholder="2,00"></div><div class="form-group"><label>Juros ao mês (%)</label><input class="form-input" value="1,00" placeholder="1,00"></div></div>
+      <div class="form-group"><label>Instruções</label><textarea class="form-input" rows="2" placeholder="Instruções de pagamento">Não receber após 30 dias do vencimento.</textarea></div>
+      <div class="form-group"><label>Nosso Número (automático)</label><input class="form-input" value="09/00000006-9" readonly style="background:var(--gray-50)"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-gerar-boleto')">Cancelar</button><button class="btn btn-accent" onclick="closeModal('modal-gerar-boleto');showToast('🏦 Boleto gerado com sucesso!')">🏦 Gerar Boleto</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-retorno">
+  <div class="modal"><div class="modal-header"><h2>📥 Importar Retorno CNAB 400</h2><button class="modal-close" onclick="closeModal('modal-retorno')">✕</button></div>
+    <div class="modal-body">
+      <div style="border:2px dashed var(--gray-300);border-radius:var(--radius);padding:40px;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--gray-300)'">
+        <div style="font-size:48px;margin-bottom:8px">📂</div>
+        <div style="font-weight:600;margin-bottom:4px">Arraste o arquivo de retorno aqui</div>
+        <div style="font-size:13px;color:var(--gray-400)">ou clique para selecionar (formato CNAB 400 Bradesco)</div>
+        <input type="file" style="display:none" accept=".txt,.ret">
+      </div>
+      <div style="margin-top:16px;padding:12px;background:var(--gray-50);border-radius:var(--radius-sm);font-size:13px;color:var(--gray-500)">
+        <strong>Processamento automático:</strong> Ao importar, o sistema fará automaticamente a baixa de boletos pagos e atualizará as contas a receber.
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-retorno')">Cancelar</button><button class="btn btn-accent" onclick="closeModal('modal-retorno');showToast('✅ Retorno importado — 2 baixas automáticas processadas')">📥 Processar Retorno</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-fiado-detalhe">
+  <div class="modal"><div class="modal-header"><h2>📝 Fiado — João Silva</h2><button class="modal-close" onclick="closeModal('modal-fiado-detalhe')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;gap:16px;margin-bottom:16px;padding:14px;background:var(--gray-50);border-radius:var(--radius-sm)">
+        <div class="fiado-avatar" style="width:56px;height:56px;font-size:22px">JS</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:16px">João Silva</div><div style="font-size:13px;color:var(--gray-500)">CPF: xxx.xxx.xxx-01 • Tel: (31) 99999-0001</div><div style="font-size:13px;color:var(--danger);font-weight:700;margin-top:4px">Saldo devedor: R$ 1.450,00 • 15 dias vencido</div></div>
+      </div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">📋 Compras no Fiado</div>
+      <table style="font-size:13px">
+        <thead><tr><th>Data</th><th>Pedido</th><th>Itens</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>02/01</td><td>#045</td><td>10x Pão, 2x Café, 1x Bolo</td><td>R$ 120,00</td></tr>
+          <tr><td>04/01</td><td>#058</td><td>5x Pão, 1x Misto, 1x Suco</td><td>R$ 95,00</td></tr>
+          <tr><td>07/01</td><td>#072</td><td>8x Pão, 3x Coxinha, 2x Refri</td><td>R$ 145,00</td></tr>
+          <tr><td>09/01</td><td>#089</td><td>12x Pão, 1x X-Salada</td><td>R$ 180,00</td></tr>
+          <tr><td>11/01</td><td>#098</td><td>6x Pão, 4x Sonho</td><td>R$ 165,00</td></tr>
+        </tbody>
+      </table>
+      <div style="text-align:right;font-weight:800;font-size:16px;margin-top:8px;color:var(--danger)">Total: R$ 1.450,00</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-fiado-detalhe')">Fechar</button>
+      <button class="btn btn-accent" onclick="closeModal('modal-fiado-detalhe');showToast('🏦 Boleto gerado para João Silva')">🏦 Gerar Boleto</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-fiado-detalhe');showToast('✅ Recebimento registrado')">💰 Receber</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+function init(){document.getElementById('dateBadge').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'});renderFluxo()}
+
+function showTab(tab){document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));document.getElementById('tab-'+tab).classList.remove('hidden');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));event.currentTarget.classList.add('active')}
+
+function renderFluxo(){
+  const days=['Seg 13','Ter 14','Qua 15','Qui 16','Sex 17','Sáb 18','Dom 19'];
+  const entradas=[2800,3200,2950,3500,4200,5800,3100];
+  const saidas=[1200,800,3200,600,2100,900,400];
+  const max=Math.max(...entradas,...saidas);let acum=15000;
+  const ch=document.getElementById('fluxo-chart');const tb=document.getElementById('fluxo-table-body');
+  ch.innerHTML=days.map((d,i)=>{const saldo=entradas[i]-saidas[i];return`<div class="fluxo-day"><div class="fluxo-day-label">${d}</div><div class="fluxo-day-bar"><div class="fluxo-bar entrada" style="height:${(entradas[i]/max)*60}px" title="Entradas: R$ ${fmt(entradas[i])}"></div><div class="fluxo-bar saida" style="height:${(saidas[i]/max)*60}px" title="Saídas: R$ ${fmt(saidas[i])}"></div></div><div class="fluxo-day-val ${saldo>=0?'pos':'neg'}">${saldo>=0?'+':''}${fmt(saldo)}</div></div>`}).join('');
+  tb.innerHTML=days.map((d,i)=>{const saldo=entradas[i]-saidas[i];acum+=saldo;return`<tr><td>${d}/01</td><td style="color:var(--success);font-weight:600">+R$ ${fmt(entradas[i])}</td><td style="color:var(--danger);font-weight:600">-R$ ${fmt(saidas[i])}</td><td style="font-weight:700;color:${saldo>=0?'var(--success)':'var(--danger)'}">${saldo>=0?'+':''}R$ ${fmt(saldo)}</td><td style="font-weight:700">R$ ${fmt(acum)}</td></tr>`}).join('')}
+
+function fmt(v){return v.toFixed(2).replace('.',',')}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const icons={success:'✅',warning:'⚠️',error:'❌'};const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span style="font-size:20px">${icons[type]}</span><span style="font-size:13px;font-weight:600">${msg}</span>`;c.appendChild(t);setTimeout(()=>t.remove(),3200)}
+
+document.addEventListener('DOMContentLoaded',init);
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')})});
+</script>
+</body>
+</html>
