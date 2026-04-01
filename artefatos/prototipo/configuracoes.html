@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padaria - Configurações</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#E8722A;--primary-dark:#C45D1E;--primary-light:#FCEEE4;--secondary:#2D6A4F;--secondary-light:#D8F3DC;--accent:#3A86FF;--accent-light:#E8F0FE;--danger:#E63946;--danger-light:#FFE0E3;--warning:#F4A261;--warning-light:#FFF3E0;--gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-500:#6B7280;--gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;--radius:12px;--radius-sm:8px;--shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);--shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);--shadow-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);--font:'Segoe UI',sans-serif}
+body{font-family:var(--font);background:var(--gray-100);color:var(--gray-800)}.app{display:flex;min-height:100vh}
+.sidebar{width:72px;background:var(--gray-900);position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px}.sidebar-logo,.sidebar-item{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}.sidebar-logo{background:var(--primary);font-size:22px;margin-bottom:12px}.sidebar-item{color:#9CA3AF;font-size:20px}.sidebar-item.active,.sidebar-item:hover{background:#374151;color:#fff}.sidebar-item.active{background:var(--primary)}.tooltip{position:absolute;left:60px;background:#1F2937;color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0}.sidebar-item:hover .tooltip{opacity:1}.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.main{margin-left:72px;flex:1}.header{position:sticky;top:0;z-index:20;background:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-200)}.title{font-size:18px;font-weight:800}.subtitle{font-size:13px;color:var(--gray-500)}.badge{padding:4px 12px;border-radius:999px;background:var(--primary-light);color:var(--primary);font-size:13px;font-weight:700}.content{padding:24px}.tabs,.card,.table-card,.seed{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)}.tabs{display:flex;gap:4px;padding:4px;margin-bottom:16px;flex-wrap:wrap}.tab{border:none;background:transparent;padding:10px 14px;border-radius:var(--radius-sm);font:700 13px var(--font);color:var(--gray-500);cursor:pointer}.tab.active{background:var(--primary);color:#fff}
+.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;margin-bottom:18px}.card{padding:16px}.logo-box{height:120px;border:2px dashed var(--gray-200);border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--gray-50);font-size:42px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.panel-title,.table-title{padding:16px 18px;border-bottom:1px solid var(--gray-200);font-size:15px;font-weight:800}.panel-body{padding:16px 18px}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.input,.btn,textarea{padding:10px 14px;border-radius:var(--radius-sm);font:14px var(--font)}.input,textarea{border:2px solid var(--gray-200);width:100%}
+.btn{border:none;cursor:pointer;font-weight:700}.btn-primary{background:var(--primary);color:#fff}.btn-outline{background:#fff;border:2px solid var(--gray-200);color:var(--gray-700)}.btn-danger{background:var(--danger);color:#fff}
+.line{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--gray-200)}.muted{font-size:12px;color:var(--gray-500)}.pill{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}.ok{background:var(--secondary-light);color:var(--secondary)}.warn{background:var(--warning-light);color:var(--warning)}.info{background:var(--accent-light);color:var(--accent)}
+table{width:100%;border-collapse:collapse}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--gray-200);font-size:14px}th{font-size:12px;text-transform:uppercase;color:var(--gray-500);background:var(--gray-50)}.hidden{display:none!important}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}.modal-overlay.show{opacity:1;pointer-events:auto}.modal{background:#fff;width:92%;max-width:720px;border-radius:16px;box-shadow:var(--shadow-xl);transform:translateY(16px) scale(.96);transition:transform .2s}.modal-overlay.show .modal{transform:none}.modal-head,.modal-foot{padding:16px 20px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}.modal-foot{border-bottom:none;border-top:1px solid var(--gray-200);justify-content:flex-end;gap:8px}.modal-body{padding:18px 20px}
+.toast-wrap{position:fixed;top:20px;right:20px;display:flex;flex-direction:column;gap:8px}.toast{background:#fff;padding:14px 16px;border-radius:12px;box-shadow:var(--shadow-md);border-left:4px solid var(--secondary)}
+@media(max-width:960px){.hero,.grid,.form{grid-template-columns:1fr}}@media(max-width:700px){.content{padding:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo" onclick="location.href='login-dashboard.html'">🍞</div>
+    <div class="sidebar-item" onclick="location.href='financeiro.html'">💵<span class="tooltip">Financeiro</span></div>
+    <div class="sidebar-item" onclick="location.href='estoque.html'">📦<span class="tooltip">Estoque</span></div>
+    <div class="sidebar-item" onclick="location.href='caixa.html'">💰<span class="tooltip">Caixa</span></div>
+    <div class="sidebar-item" onclick="location.href='producao.html'">🥖<span class="tooltip">Produção</span></div>
+    <div class="sidebar-item" onclick="location.href='higiene.html'">🧼<span class="tooltip">Higiene</span></div>
+    <div class="sidebar-item" onclick="location.href='manutencao.html'">🛠️<span class="tooltip">Manutenção</span></div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-item" onclick="location.href='relatorios.html'">📊<span class="tooltip">Relatórios</span></div>
+      <div class="sidebar-item active">⚙️<span class="tooltip">Config</span></div>
+    </div>
+  </nav>
+  <div class="main">
+    <header class="header"><div><div class="title">⚙️ Configurações e Parametrização</div><div class="subtitle">Empresa, segurança, Bradesco, backup, horários e seed data do sistema</div></div><span class="badge" id="dateBadge"></span></header>
+    <div class="content">
+      <div class="hero">
+        <div class="card">
+          <div class="panel-title" style="padding:0 0 12px;border:none">🏢 Dados da empresa</div>
+          <div class="form">
+            <div class="field"><label>Nome fantasia</label><input class="input" value="Padaria Pão Quente"></div>
+            <div class="field"><label>Razão social</label><input class="input" value="Padaria Pão Quente Ltda"></div>
+            <div class="field"><label>CNPJ</label><input class="input" value="12.345.678/0001-90"></div>
+            <div class="field"><label>Telefone</label><input class="input" value="(31) 3333-1122"></div>
+            <div class="field"><label>E-mail</label><input class="input" value="contato@paoquente.com.br"></div>
+            <div class="field"><label>Endereço</label><input class="input" value="Rua do Forno, 125 - Centro"></div>
+          </div>
+          <div style="height:12px"></div>
+          <button class="btn btn-primary" onclick="toast('Dados da empresa salvos')">Salvar dados</button>
+        </div>
+        <div class="card">
+          <div class="panel-title" style="padding:0 0 12px;border:none">🖼️ Logo e impressão</div>
+          <div class="logo-box">🏪</div>
+          <div style="height:12px"></div>
+          <div class="line"><div><strong>Logo atual</strong><div class="muted">Usado em relatórios e PDF</div></div><span class="pill ok">PNG</span></div>
+          <div class="line"><div><strong>Formato de data</strong><div class="muted">Aplicado em M12</div></div><span class="pill info">dd/MM/yyyy</span></div>
+          <div style="height:12px"></div>
+          <button class="btn btn-outline" onclick="toast('Preview de logo aberto')">Trocar logo</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('operacao',event)">Operação</button>
+        <button class="tab" onclick="showTab('seguranca',event)">Segurança</button>
+        <button class="tab" onclick="showTab('bradesco',event)">Bradesco</button>
+        <button class="tab" onclick="showTab('backup',event)">Backup</button>
+        <button class="tab" onclick="showTab('seed',event)">Seed data</button>
+      </div>
+
+      <section id="tab-operacao">
+        <div class="grid">
+          <div class="card"><div class="panel-title">📦 Estoque, caixa e fiado</div><div class="panel-body">
+            <div class="line"><div><strong>Alerta de validade</strong><div class="muted">Dias antes do vencimento</div></div><span class="pill info">3 dias</span></div>
+            <div class="line"><div><strong>Troco padrão da abertura</strong><div class="muted">Usado no M07</div></div><span class="pill ok">R$ 200,00</span></div>
+            <div class="line"><div><strong>Limite sangria sem aprovação</strong><div class="muted">Acima disso exige gerente</div></div><span class="pill warn">R$ 500,00</span></div>
+            <div class="line"><div><strong>Limite de crédito padrão</strong><div class="muted">Novos clientes fiado</div></div><span class="pill info">R$ 200,00</span></div>
+            <button class="btn btn-primary" onclick="toast('Parâmetros operacionais atualizados')">Salvar operação</button>
+          </div></div>
+          <div class="card"><div class="panel-title">🕒 Horário de funcionamento</div><div class="panel-body" id="schedule"></div></div>
+        </div>
+      </section>
+
+      <section id="tab-seguranca" class="hidden">
+        <div class="card"><div class="panel-title">🔐 Regras de acesso</div><div class="panel-body">
+          <div class="form">
+            <div class="field"><label>Timeout de sessão (min)</label><input class="input" value="30"></div>
+            <div class="field"><label>Máx. tentativas login</label><input class="input" value="5"></div>
+            <div class="field"><label>Tamanho mínimo senha</label><input class="input" value="6"></div>
+            <div class="field"><label>Tamanho do PIN</label><input class="input" value="4"></div>
+          </div>
+          <div style="height:12px"></div>
+          <button class="btn btn-danger" onclick="openModal('confirm')">Salvar segurança</button>
+        </div></div>
+      </section>
+
+      <section id="tab-bradesco" class="hidden">
+        <div class="card"><div class="panel-title">🏦 Configuração Bradesco / CNAB 400</div><div class="panel-body">
+          <div class="form">
+            <div class="field"><label>Agência</label><input class="input" value="1234"></div>
+            <div class="field"><label>Conta</label><input class="input" value="56789-0"></div>
+            <div class="field"><label>Carteira</label><input class="input" value="09"></div>
+            <div class="field"><label>Empresa cedente</label><input class="input" value="Padaria Pão Quente Ltda"></div>
+            <div class="field"><label>Juros ao dia (%)</label><input class="input" value="0,33"></div>
+            <div class="field"><label>Multa (%)</label><input class="input" value="2,00"></div>
+          </div>
+          <div style="height:12px"></div>
+          <button class="btn btn-primary" onclick="toast('Parâmetros Bradesco salvos')">Salvar Bradesco</button>
+        </div></div>
+      </section>
+
+      <section id="tab-backup" class="hidden">
+        <div class="grid">
+          <div class="card"><div class="panel-title">☁️ Backup automático</div><div class="panel-body">
+            <div class="line"><div><strong>Frequência</strong><div class="muted">Rotina padrão do sistema</div></div><span class="pill ok">Diária</span></div>
+            <div class="line"><div><strong>Horário</strong><div class="muted">Preferencial para baixa operação</div></div><span class="pill info">23:00</span></div>
+            <div class="line"><div><strong>Notificação</strong><div class="muted">Resumo enviado ao administrativo</div></div><span class="pill ok">Ativa</span></div>
+            <button class="btn btn-outline" onclick="toast('Teste de backup agendado')">Testar rotina</button>
+          </div></div>
+          <div class="card"><div class="panel-title">📋 Auditoria de alterações</div><div class="panel-body">
+            <div class="line"><div><strong>31/03 18:15</strong><div class="muted">Gerente alterou troco padrão</div></div><span class="pill warn">R$ 150 → 200</span></div>
+            <div class="line"><div><strong>31/03 17:40</strong><div class="muted">Dono ajustou formato de impressão</div></div><span class="pill info">PDF</span></div>
+            <div class="line"><div><strong>31/03 16:10</strong><div class="muted">Administrativo atualizou e-mail</div></div><span class="pill ok">Empresa</span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <section id="tab-seed" class="hidden">
+        <div class="table-card"><div class="table-title">🧪 Seed data padrão</div><table><thead><tr><th>Chave</th><th>Valor padrão</th><th>Tipo</th><th>Ação</th></tr></thead><tbody id="seedRows"></tbody></table></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="confirm"><div class="modal"><div class="modal-head"><strong>🔒 Confirmar parâmetros de segurança</strong><button class="btn btn-outline" onclick="closeModal('confirm')">Fechar</button></div><div class="modal-body"><p class="muted" style="margin-bottom:14px">Alterações em segurança exigem confirmação de senha do usuário responsável.</p><div class="field"><label>Senha atual</label><input class="input" type="password" value="123456"></div></div><div class="modal-foot"><button class="btn btn-outline" onclick="closeModal('confirm')">Cancelar</button><button class="btn btn-danger" onclick="saveSecurity()">Confirmar</button></div></div></div>
+<div class="toast-wrap" id="toasts"></div>
+<script>
+const hours=[['Segunda','05:30','20:00'],['Terça','05:30','20:00'],['Quarta','05:30','20:00'],['Quinta','05:30','20:00'],['Sexta','05:30','20:30'],['Sábado','05:30','19:00'],['Domingo','06:00','12:00']];
+const seeds=[['seguranca.timeout_minutos','30','NUMERO'],['seguranca.max_tentativas_login','5','NUMERO'],['estoque.dias_alerta_validade','3','NUMERO'],['caixa.troco_padrao','200.00','NUMERO'],['caixa.limite_sangria_sem_aprovacao','500.00','NUMERO'],['fiado.limite_credito_padrao','200.00','NUMERO'],['producao.margem_padrao_percentual','50','NUMERO'],['relatorios.periodo_padrao_dias','30','NUMERO'],['backup.frequencia','DIARIA','TEXTO'],['backup.horario','23:00','TEXTO']];
+function init(){dateBadge.textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});schedule.innerHTML=hours.map(h=>`<div class="line"><div><strong>${h[0]}</strong><div class="muted">Abertura ${h[1]} • Fechamento ${h[2]}</div></div><span class="pill ok">Ativo</span></div>`).join('');seedRows.innerHTML=seeds.map(s=>`<tr><td><strong>${s[0]}</strong></td><td>${s[1]}</td><td>${s[2]}</td><td><button class="btn btn-outline" onclick="toast('Parâmetro restaurado: ${s[0]}')">Restaurar padrão</button></td></tr>`).join('')}
+function showTab(id,e){document.querySelectorAll('section[id^="tab-"]').forEach(s=>s.classList.add('hidden'));document.getElementById('tab-'+id).classList.remove('hidden');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));e.currentTarget.classList.add('active')}
+function openModal(id){document.getElementById(id).classList.add('show')}function closeModal(id){document.getElementById(id).classList.remove('show')}
+function saveSecurity(){closeModal('confirm');toast('Parâmetros de segurança salvos com auditoria')}
+function toast(msg){const n=document.createElement('div');n.className='toast';n.textContent=msg;toasts.appendChild(n);setTimeout(()=>n.remove(),2800)}
+document.addEventListener('DOMContentLoaded',init);document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padaria - Estoque</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#E8722A;--primary-dark:#C45D1E;--primary-light:#FCEEE4;--secondary:#2D6A4F;--secondary-light:#D8F3DC;--accent:#3A86FF;--accent-light:#E8F0FE;--danger:#E63946;--danger-light:#FFE0E3;--warning:#F4A261;--warning-light:#FFF3E0;--gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;--gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;--radius:12px;--radius-sm:8px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);--shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);--shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);--shadow-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;--transition:.2s ease}
+body{font-family:var(--font);background:var(--gray-100);color:var(--gray-800);line-height:1.45}
+.app{display:flex;min-height:100vh}.sidebar{width:72px;background:var(--gray-900);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;position:fixed;inset:0 auto 0 0;z-index:100;overflow-y:auto}.sidebar::-webkit-scrollbar{width:0}.sidebar-logo{width:44px;height:44px;background:var(--primary);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;cursor:pointer}.sidebar-item{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gray-400);cursor:pointer;transition:all var(--transition);position:relative}.sidebar-item:hover{background:var(--gray-700);color:#fff}.sidebar-item.active{background:var(--primary);color:#fff}.sidebar-item .tooltip{position:absolute;left:60px;background:var(--gray-800);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--transition)}.sidebar-item:hover .tooltip{opacity:1}.sidebar-divider{width:36px;height:1px;background:var(--gray-700);margin:6px 0}.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.main{margin-left:72px;flex:1;display:flex;flex-direction:column}.header{background:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:50}.header-title{font-size:18px;font-weight:800}.header-subtitle{font-size:13px;color:var(--gray-500)}.header-right{display:flex;gap:12px;align-items:center}.header-badge{padding:4px 12px;border-radius:999px;background:var(--primary-light);color:var(--primary);font-size:13px;font-weight:700}.header-user{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--secondary);color:#fff;font-weight:800}
+.content{padding:24px;flex:1}.hidden{display:none!important}.tabs-bar{display:flex;gap:4px;background:#fff;padding:4px;border-radius:var(--radius);margin-bottom:20px;box-shadow:var(--shadow);flex-wrap:wrap}.tab-btn{padding:10px 14px;border:none;border-radius:var(--radius-sm);background:transparent;font:700 13px var(--font);color:var(--gray-500);cursor:pointer;display:flex;gap:6px;align-items:center}.tab-btn:hover{background:var(--gray-100)}.tab-btn.active{background:var(--primary);color:#fff;box-shadow:var(--shadow-md)}.badge{padding:2px 8px;border-radius:999px;background:var(--gray-200);font-size:11px}.tab-btn.active .badge{background:rgba(255,255,255,.25)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}.stat-card,.table-card,.panel-card,.alert-card,.suggestion-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)}.stat-card{padding:16px;display:flex;align-items:center;gap:12px}.stat-icon{width:46px;height:46px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px}.stat-value{font-size:22px;font-weight:800}.stat-label{font-size:12px;color:var(--gray-500)}
+.layout-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}.table-header,.panel-header{padding:16px 20px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;gap:12px}.table-header h3,.panel-header h3{font-size:15px;font-weight:800}.toolbar,.table-actions,.inline-actions,.chip-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar{margin-bottom:16px}.search-input,.select-input,.form-input{padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font:14px var(--font);outline:none;background:#fff}.search-input{flex:1;min-width:220px}.search-input:focus,.select-input:focus,.form-input:focus{border-color:var(--primary)}
+.btn{padding:10px 16px;border:none;border-radius:var(--radius-sm);font:700 13px var(--font);cursor:pointer;display:inline-flex;align-items:center;gap:6px}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}.btn-secondary{background:var(--secondary);color:#fff}.btn-outline{background:#fff;border:2px solid var(--gray-200);color:var(--gray-700)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}.btn-danger{background:var(--danger);color:#fff}.btn-sm{padding:6px 10px;font-size:12px}
+table{width:100%;border-collapse:collapse}th{padding:10px 16px;background:var(--gray-50);font-size:12px;text-transform:uppercase;color:var(--gray-500);text-align:left;border-bottom:1px solid var(--gray-200)}td{padding:12px 16px;border-bottom:1px solid var(--gray-100);font-size:14px;vertical-align:top}tr:hover{background:var(--gray-50)}
+.status-pill,.chip{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:5px}.chip{background:var(--gray-100);color:var(--gray-600)}.status-ok,.status-disponivel,.status-a{background:var(--secondary-light);color:var(--secondary)}.status-alerta,.status-b,.status-em_andamento{background:var(--warning-light);color:var(--warning)}.status-critico,.status-vencido,.status-c,.status-finalizado{background:var(--danger-light);color:var(--danger)}.status-esgotado,.status-aprovado{background:var(--accent-light);color:var(--accent)}
+.alert-list,.timeline,.suggestions{display:flex;flex-direction:column;gap:10px}.alert-card,.suggestion-card{padding:16px}.alert-card strong,.suggestion-card strong{display:block;font-size:15px;margin-bottom:4px}.muted{font-size:12px;color:var(--gray-500)}.kpi-box{padding:14px;border-radius:var(--radius-sm);margin-bottom:12px}.kpi-box strong{display:block;font-size:22px}.kpi-box small{display:block;color:var(--gray-500);font-weight:700;margin-bottom:4px}.kpi-primary{background:var(--primary-light)}.kpi-warning{background:var(--warning-light)}.kpi-success{background:var(--secondary-light)}.kpi-accent{background:var(--accent-light)}
+.abc-grid,.inventory-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.inventory-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:12px;border-radius:var(--radius-sm);background:var(--gray-50)}.timeline-item{padding:12px;border-radius:var(--radius-sm);background:var(--gray-50)}.timeline-item strong{display:block;margin-bottom:4px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s}.modal-overlay.show{opacity:1;pointer-events:all}.modal{background:#fff;border-radius:var(--radius-lg);width:92%;max-width:720px;max-height:86vh;overflow:auto;box-shadow:var(--shadow-xl);transform:translateY(18px) scale(.96);transition:transform .3s}.modal-overlay.show .modal{transform:translateY(0) scale(1)}.modal-header{padding:20px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}.modal-body{padding:20px 24px}.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px}.modal-close{width:32px;height:32px;border:none;background:var(--gray-100);border-radius:50%;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-group{margin-bottom:14px}.form-group label{display:block;font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:6px}
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}.toast{background:#fff;border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:280px;border-left:4px solid var(--secondary);animation:in .35s ease,out .35s ease 2.75s forwards}.toast.warning{border-left-color:var(--warning)}.toast.error{border-left-color:var(--danger)}@keyframes in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}@keyframes out{from{opacity:1}to{opacity:0;transform:translateX(40px)}}
+@media(max-width:900px){.stats-grid,.layout-grid,.abc-grid,.inventory-grid,.form-row{grid-template-columns:1fr}.inventory-row{grid-template-columns:1fr 1fr}.search-input{min-width:100%}}
+@media(max-width:600px){.content{padding:16px}.header{padding:12px 16px}.stats-grid{grid-template-columns:1fr 1fr}.inventory-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo" onclick="location.href='login-dashboard.html'">🍞</div>
+    <div class="sidebar-item" onclick="location.href='atendimento.html'">➕<span class="tooltip">Pedidos</span></div>
+    <div class="sidebar-item" onclick="location.href='caixa.html'">💰<span class="tooltip">Caixa</span></div>
+    <div class="sidebar-item" onclick="location.href='financeiro.html'">💵<span class="tooltip">Financeiro</span></div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="location.href='cadastros.html'">👥<span class="tooltip">Cadastros</span></div>
+    <div class="sidebar-item active">📦<span class="tooltip">Estoque</span></div>
+    <div class="sidebar-item" onclick="location.href='compras.html'">🛒<span class="tooltip">Compras</span></div>
+    <div class="sidebar-item" onclick="location.href='producao.html'">🥣<span class="tooltip">Produção</span></div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-item" onclick="location.href='relatorios.html'">📊<span class="tooltip">Relatórios</span></div>
+      <div class="sidebar-item" onclick="location.href='configuracoes.html'">⚙️<span class="tooltip">Config</span></div>
+    </div>
+  </nav>
+  <div class="main">
+    <header class="header">
+      <div><div class="header-title">📦 Estoque e Controle de Validade</div><div class="header-subtitle">Saldo atual, lotes, perdas, inventário e sugestão automática de compra</div></div>
+      <div class="header-right"><span class="header-badge" id="dateBadge"></span><div class="header-user">AD</div></div>
+    </header>
+    <div class="content">
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="showTab('dashboard',event)">🏠 Dashboard <span class="badge">4</span></button>
+        <button class="tab-btn" onclick="showTab('saldos',event)">📋 Saldos</button>
+        <button class="tab-btn" onclick="showTab('lotes',event)">🏷️ Lotes</button>
+        <button class="tab-btn" onclick="showTab('movimentos',event)">🔄 Movimentações</button>
+        <button class="tab-btn" onclick="showTab('inventario',event)">🧮 Inventário</button>
+        <button class="tab-btn" onclick="showTab('perdas',event)">🗑️ Perdas</button>
+        <button class="tab-btn" onclick="showTab('comprar',event)">🛒 Sugestão Compra</button>
+      </div>
+
+      <div id="tab-dashboard" class="tab-content">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">📉</div><div><div class="stat-value">4</div><div class="stat-label">Itens abaixo do mínimo</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light)">⏳</div><div><div class="stat-value">3</div><div class="stat-label">Lotes vencendo</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">🚨</div><div><div class="stat-value">2</div><div class="stat-label">Lotes vencidos</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--accent-light)">🧮</div><div><div class="stat-value">26/03</div><div class="stat-label">Último inventário</div></div></div>
+        </div>
+        <div class="layout-grid">
+          <div>
+            <div class="table-card">
+              <div class="table-header"><h3>📋 Saldos críticos do estoque</h3><div class="table-actions"><button class="btn btn-outline btn-sm" onclick="openModal('modal-entrada')">+ Entrada</button><button class="btn btn-primary btn-sm" onclick="showTab('comprar',{currentTarget:document.querySelectorAll('.tab-btn')[6]})">Ver compra</button></div></div>
+              <table>
+                <thead><tr><th>Item</th><th>Tipo</th><th>Saldo</th><th>Mínimo</th><th>Próx. validade</th><th>Status</th></tr></thead>
+                <tbody id="dashboardCritical"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="kpi-box kpi-warning"><small>Perdas no mês</small><strong>R$ 1.284</strong></div>
+            <div class="kpi-box kpi-primary"><small>Custo médio estoque</small><strong>R$ 18.640</strong></div>
+            <div class="kpi-box kpi-success"><small>Itens classe A</small><strong>6 itens</strong></div>
+            <div class="panel-card">
+              <div class="panel-header"><h3>🔔 Alertas imediatos</h3></div>
+              <div class="modal-body"><div class="alert-list" id="alertsList"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-saldos" class="tab-content hidden">
+        <div class="toolbar">
+          <input class="search-input" id="stockSearch" placeholder="Buscar item, tipo ou fornecedor preferencial" oninput="renderStock()">
+          <select class="select-input" id="stockType" onchange="renderStock()"><option value="TODOS">Tipo: todos</option><option value="INSUMO">Insumos produção</option><option value="PRONTO">Produtos prontos</option><option value="APOIO">Apoio / limpeza</option></select>
+          <button class="btn btn-primary" onclick="openModal('modal-entrada')">+ Entrada estoque</button>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>📋 Saldo consolidado por item</h3><button class="btn btn-outline btn-sm" onclick="showToast('📷 Leitor de código de barras disponível no mobile')">📷 Ler código</button></div>
+          <table>
+            <thead><tr><th>Item</th><th>Saldo</th><th>Custo médio</th><th>Mínimo</th><th>Classe ABC</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="stockTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-lotes" class="tab-content hidden">
+        <div class="layout-grid">
+          <div class="table-card">
+            <div class="table-header"><h3>🏷️ Controle de lotes e validade</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-descarte')">Registrar descarte</button></div>
+            <table>
+              <thead><tr><th>Lote</th><th>Item</th><th>Validade</th><th>Saldo lote</th><th>Situação</th><th>PVPS</th></tr></thead>
+              <tbody id="lotsTable"></tbody>
+            </table>
+          </div>
+          <div class="panel-card">
+            <div class="panel-header"><h3>📌 Regra PVPS</h3></div>
+            <div class="modal-body">
+              <div class="callout">Ao registrar saída, o sistema sugere sempre o lote com vencimento mais próximo. Lotes vencidos ficam bloqueados até descarte formal.</div>
+              <div class="timeline" id="pvpsPanel"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-movimentos" class="tab-content hidden">
+        <div class="table-card">
+          <div class="table-header"><h3>🔄 Histórico de movimentação</h3><div class="table-actions"><button class="btn btn-outline btn-sm" onclick="openModal('modal-entrada')">Entrada</button><button class="btn btn-secondary btn-sm" onclick="showToast('✅ Saída registrada com PVPS sugerido')">Saída</button></div></div>
+          <table>
+            <thead><tr><th>Data</th><th>Item</th><th>Tipo</th><th>Motivo</th><th>Quantidade</th><th>Responsável</th><th>Documento</th></tr></thead>
+            <tbody id="movesTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-inventario" class="tab-content hidden">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light)">🟡</div><div><div class="stat-value">5</div><div class="stat-label">Diferenças abertas</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--accent-light)">📍</div><div><div class="stat-value">31</div><div class="stat-label">Itens contados</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--primary-light)">👤</div><div><div class="stat-value">Silvio</div><div class="stat-label">Responsável atual</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--secondary-light)">✔️</div><div><div class="stat-value">Aguardando</div><div class="stat-label">Status aprovação</div></div></div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-header"><h3>🧮 Contagem física</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-inventario')">Finalizar inventário</button></div>
+          <div class="modal-body"><div class="inventory-grid" id="inventoryList"></div></div>
+        </div>
+      </div>
+
+      <div id="tab-perdas" class="tab-content hidden">
+        <div class="layout-grid">
+          <div class="table-card">
+            <div class="table-header"><h3>🗑️ Perdas e desperdícios</h3><button class="btn btn-danger btn-sm" onclick="openModal('modal-descarte')">Novo descarte</button></div>
+            <table>
+              <thead><tr><th>Data</th><th>Item</th><th>Motivo</th><th>Quantidade</th><th>Valor estimado</th><th>Responsável</th></tr></thead>
+              <tbody id="lossesTable"></tbody>
+            </table>
+          </div>
+          <div>
+            <div class="kpi-box kpi-warning"><small>Perda por vencimento</small><strong>R$ 612</strong></div>
+            <div class="kpi-box kpi-accent"><small>Perda por preparo</small><strong>R$ 448</strong></div>
+            <div class="kpi-box kpi-primary"><small>Perda por avaria</small><strong>R$ 224</strong></div>
+            <div class="panel-card"><div class="panel-header"><h3>📊 Curva ABC mensal</h3></div><div class="modal-body"><div class="abc-grid" id="abcGrid"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-comprar" class="tab-content hidden">
+        <div class="panel-card">
+          <div class="panel-header"><h3>🛒 Sugestão automática de compra</h3><div class="table-actions"><button class="btn btn-outline btn-sm" onclick="showToast('📤 Pedido enviado para Compras (M04)')">Gerar pedido</button></div></div>
+          <div class="modal-body"><div class="suggestions" id="suggestionsList"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-entrada">
+  <div class="modal">
+    <div class="modal-header"><h2>➕ Entrada de estoque</h2><button class="modal-close" onclick="closeModal('modal-entrada')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Item</label><select class="form-input"><option>Farinha de Trigo Especial 50kg</option><option>Queijo Muçarela</option><option>Álcool 70%</option></select></div>
+        <div class="form-group"><label>Fornecedor</label><select class="form-input"><option>Moinho Real</option><option>Laticínios São João</option><option>Embalagens Prime</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Quantidade</label><input class="form-input" placeholder="0"></div>
+        <div class="form-group"><label>Custo unitário</label><input class="form-input" placeholder="R$ 0,00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Lote</label><input class="form-input" placeholder="Código do fornecedor"></div>
+        <div class="form-group"><label>Validade</label><input class="form-input" type="date"></div>
+      </div>
+      <div class="form-group"><label>Documento referência</label><input class="form-input" placeholder="NF, recibo ou pedido de compra"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-entrada')">Cancelar</button><button class="btn btn-primary" onclick="saveEntry()">Salvar entrada</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-descarte">
+  <div class="modal">
+    <div class="modal-header"><h2>🗑️ Descarte formal</h2><button class="modal-close" onclick="closeModal('modal-descarte')">✕</button></div>
+    <div class="modal-body">
+      <div class="callout">Descarte gera movimento de perda, atualiza saldo do lote e registra auditoria com valor estimado.</div>
+      <div class="form-row">
+        <div class="form-group"><label>Lote</label><select class="form-input"><option>LT-240301 • Queijo Muçarela</option><option>LT-240227 • Alface Crespa</option><option>LT-240310 • Pão de Hot Dog</option></select></div>
+        <div class="form-group"><label>Motivo</label><select class="form-input"><option>DESCARTE_VENCIMENTO</option><option>DESCARTE_AVARIA</option><option>DESCARTE_PREPARO</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Quantidade</label><input class="form-input" placeholder="0"></div>
+        <div class="form-group"><label>Responsável</label><select class="form-input"><option>Silvio Costa</option><option>Amanda Prado</option></select></div>
+      </div>
+      <div class="form-group"><label>Observação</label><input class="form-input" placeholder="Descreva o motivo do descarte"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-descarte')">Cancelar</button><button class="btn btn-danger" onclick="saveLoss()">Confirmar descarte</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-inventario">
+  <div class="modal">
+    <div class="modal-header"><h2>🧮 Finalizar inventário</h2><button class="modal-close" onclick="closeModal('modal-inventario')">✕</button></div>
+    <div class="modal-body">
+      <div class="callout">Ao aprovar o inventário, o sistema gera automaticamente ajustes positivos ou negativos com justificativa obrigatória.</div>
+      <div class="timeline">
+        <div class="timeline-item"><strong>Farinha de Trigo Especial 50kg</strong><div class="muted">Sistema: 8 sacos • Contado: 7 sacos • Diferença: -1</div></div>
+        <div class="timeline-item"><strong>Queijo Muçarela</strong><div class="muted">Sistema: 12 kg • Contado: 11,4 kg • Diferença: -0,6 kg</div></div>
+        <div class="timeline-item"><strong>Sacola Kraft P</strong><div class="muted">Sistema: 620 un • Contado: 650 un • Diferença: +30</div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-inventario')">Revisar depois</button><button class="btn btn-primary" onclick="finishInventory()">Enviar para aprovação</button></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script>
+const stockItems=[{id:1,item:'Farinha de Trigo Especial 50kg',tipo:'INSUMO',saldo:'8 sacos',custo:168,minimo:'10 sacos',validade:'18/04',status:'CRITICO',abc:'A',preferencial:'Moinho Real'},{id:2,item:'Queijo Muçarela',tipo:'INSUMO',saldo:'12 kg',custo:37.9,minimo:'14 kg',validade:'03/04',status:'ALERTA',abc:'A',preferencial:'Laticínios São João'},{id:3,item:'Álcool 70%',tipo:'APOIO',saldo:'16 L',custo:9.8,minimo:'12 L',validade:'11/2027',status:'OK',abc:'C',preferencial:'Higiclean'},{id:4,item:'Pão de Hot Dog',tipo:'PRONTO',saldo:'22 un',custo:1.35,minimo:'18 un',validade:'01/04',status:'ALERTA',abc:'B',preferencial:'Produção própria'},{id:5,item:'Sacola Kraft P',tipo:'APOIO',saldo:'620 un',custo:.41,minimo:'300 un',validade:'-',status:'OK',abc:'B',preferencial:'Embalagens Prime'},{id:6,item:'Alface Crespa',tipo:'INSUMO',saldo:'3 maços',custo:4.2,minimo:'6 maços',validade:'31/03',status:'CRITICO',abc:'C',preferencial:'Horti Serra'}];
+const lots=[{lote:'LT-240318',item:'Farinha de Trigo Especial 50kg',validade:'18/04/2026',saldo:'8 sacos',situacao:'DISPONIVEL',pvps:'Próximo da fila'},{lote:'LT-240326',item:'Queijo Muçarela',validade:'03/04/2026',saldo:'12 kg',situacao:'DISPONIVEL',pvps:'1º a sair'},{lote:'LT-240227',item:'Alface Crespa',validade:'31/03/2026',saldo:'3 maços',situacao:'VENCIDO',pvps:'Bloqueado'},{lote:'LT-240310',item:'Pão de Hot Dog',validade:'01/04/2026',saldo:'22 un',situacao:'DISPONIVEL',pvps:'2º a sair'},{lote:'LT-240212',item:'Molho especial',validade:'26/03/2026',saldo:'1,2 L',situacao:'VENCIDO',pvps:'Bloqueado'}];
+const moves=[['31/03 07:42','Farinha de Trigo Especial 50kg','ENTRADA','COMPRA','+4 sacos','Amanda','NF 91821'],['31/03 08:15','Queijo Muçarela','SAIDA','PRODUCAO','-1,8 kg','Silvio','OP-042'],['31/03 09:02','Pão de Hot Dog','SAIDA','VENDA','-18 un','Sistema','PDV M06'],['30/03 17:48','Alface Crespa','PERDA','DESCARTE_VENCIMENTO','-3 maços','Amanda','DESC-011'],['30/03 18:15','Sacola Kraft P','AJUSTE_POSITIVO','INVENTARIO','+30 un','Silvio','INV-0326']];
+const losses=[['30/03','Alface Crespa','Vencimento','3 maços','R$ 12,60','Amanda'],['29/03','Molho especial','Preparo incorreto','1,2 L','R$ 36,00','Silvio'],['27/03','Pão de Hot Dog','Avaria','24 un','R$ 32,40','Rafael'],['26/03','Queijo Muçarela','Vencimento','4 kg','R$ 151,60','Amanda']];
+const alerts=[['Farinha abaixo do mínimo','Saldo atual 8 sacos • mínimo 10 • comprar ainda hoje','warning'],['Queijo vence em 3 dias','Lote LT-240326 deve ser priorizado na produção','warning'],['Alface vencida','Lote LT-240227 exige descarte formal imediato','error'],['Molho especial vencido','Lote bloqueado até registro de perda','error']];
+const suggestions=[['Farinha de Trigo Especial 50kg','Saldo 8 sacos • consumo médio 0,9 saco/dia • falta em 2 dias','Comprar 12 sacos com Moinho Real','R$ 2.016'],['Queijo Muçarela','Saldo 12 kg • consumo médio 2,4 kg/dia • falta em 1 dia','Comprar 18 kg com Laticínios São João','R$ 682,20'],['Alface Crespa','Saldo 3 maços • consumo médio 2 maços/dia • lote vencido','Comprar 15 maços com Horti Serra','R$ 63,00'],['Pão de Hot Dog','Saldo 22 un • pico de venda na sexta','Produzir 60 un via M05','R$ 81,00']];
+const inventory=[['Farinha de Trigo Especial 50kg','8 sacos','7 sacos','-1'],['Queijo Muçarela','12 kg','11,4 kg','-0,6'],['Sacola Kraft P','620 un','650 un','+30'],['Pão de Hot Dog','22 un','19 un','-3']];
+
+function init(){document.getElementById('dateBadge').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'});renderDashboard();renderStock();renderLots();renderMoves();renderInventory();renderLosses();renderSuggestions()}
+function showTab(tab,event){document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));document.getElementById('tab-'+tab).classList.remove('hidden');document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));event.currentTarget.classList.add('active')}
+function renderDashboard(){document.getElementById('dashboardCritical').innerHTML=stockItems.filter(i=>i.status!=='OK').map(i=>`<tr><td><strong>${i.item}</strong><div class="muted">${i.preferencial}</div></td><td>${beautifyType(i.tipo)}</td><td>${i.saldo}</td><td>${i.minimo}</td><td>${i.validade}</td><td><span class="status-pill ${statusClass(i.status)}">${beautifyStatus(i.status)}</span></td></tr>`).join('');document.getElementById('alertsList').innerHTML=alerts.map(a=>`<div class="alert-card"><strong>${a[0]}</strong><div class="muted">${a[1]}</div><div class="chip-row" style="margin-top:8px"><span class="status-pill ${a[2]==='warning'?'status-alerta':'status-critico'}">${a[2]==='warning'?'Atenção':'Ação imediata'}</span></div></div>`).join('')}
+function renderStock(){const term=document.getElementById('stockSearch').value.toLowerCase(),type=document.getElementById('stockType').value;const filtered=stockItems.filter(i=>(!term||`${i.item} ${i.tipo} ${i.preferencial}`.toLowerCase().includes(term))&&(type==='TODOS'||i.tipo===type));document.getElementById('stockTable').innerHTML=filtered.map(i=>`<tr><td><strong>${i.item}</strong><div class="muted">${i.preferencial}</div></td><td>${i.saldo}</td><td>${fmtMoney(i.custo)}</td><td>${i.minimo}</td><td><span class="status-pill status-${i.abc.toLowerCase()}">${i.abc}</span></td><td><span class="status-pill ${statusClass(i.status)}">${beautifyStatus(i.status)}</span></td><td><button class="btn btn-sm btn-outline" onclick="openStockDetail(${i.id})">Histórico</button></td></tr>`).join('')}
+function renderLots(){document.getElementById('lotsTable').innerHTML=lots.map(l=>`<tr><td><strong>${l.lote}</strong></td><td>${l.item}</td><td>${l.validade}</td><td>${l.saldo}</td><td><span class="status-pill ${lotClass(l.situacao)}">${beautifyLot(l.situacao)}</span></td><td>${l.pvps}</td></tr>`).join('');document.getElementById('pvpsPanel').innerHTML=lots.slice(0,4).map(l=>`<div class="timeline-item"><strong>${l.item}</strong><div class="muted">${l.lote} • validade ${l.validade} • ${l.pvps}</div></div>`).join('')}
+function renderMoves(){document.getElementById('movesTable').innerHTML=moves.map(m=>`<tr><td>${m[0]}</td><td><strong>${m[1]}</strong></td><td>${m[2]}</td><td>${m[3]}</td><td>${m[4]}</td><td>${m[5]}</td><td>${m[6]}</td></tr>`).join('')}
+function renderInventory(){document.getElementById('inventoryList').innerHTML=inventory.map(i=>`<div class="inventory-row"><div><strong>${i[0]}</strong><div class="muted">Justificativa obrigatória se houver diferença</div></div><div><span class="chip">Sistema ${i[1]}</span></div><div><span class="chip">Contado ${i[2]}</span></div><div><span class="status-pill ${i[3].startsWith('-')?'status-critico':'status-esgotado'}">${i[3]}</span></div></div>`).join('')}
+function renderLosses(){document.getElementById('lossesTable').innerHTML=losses.map(l=>`<tr><td>${l[0]}</td><td><strong>${l[1]}</strong></td><td>${l[2]}</td><td>${l[3]}</td><td>${l[4]}</td><td>${l[5]}</td></tr>`).join('');document.getElementById('abcGrid').innerHTML=[['Classe A','Top 20% dos itens • 80% do valor consumido','Farinha, queijo, café'],['Classe B','Itens de giro médio','Sacolas, embalagens, pão hot dog'],['Classe C','Baixo impacto financeiro','Verduras, descartáveis menores']].map(a=>`<div class="suggestion-card"><strong>${a[0]}</strong><div class="muted">${a[1]}</div><div style="margin-top:8px">${a[2]}</div></div>`).join('')}
+function renderSuggestions(){document.getElementById('suggestionsList').innerHTML=suggestions.map(s=>`<div class="suggestion-card"><strong>${s[0]}</strong><div class="muted">${s[1]}</div><div class="chip-row" style="margin:10px 0"><span class="chip">${s[2]}</span><span class="status-pill status-alerta">${s[3]}</span></div><button class="btn btn-sm btn-primary" onclick="showToast('📤 ${s[0]} enviado para pedido de compra')">Selecionar</button></div>`).join('')}
+function openStockDetail(id){const item=stockItems.find(i=>i.id===id);showToast(`📌 Histórico de ${item.item} consultado`) }
+function saveEntry(){closeModal('modal-entrada');showToast('✅ Entrada registrada e custo médio recalculado')}
+function saveLoss(){closeModal('modal-descarte');showToast('🗑️ Descarte registrado com auditoria','warning')}
+function finishInventory(){closeModal('modal-inventario');showToast('📨 Inventário enviado para aprovação')}
+function statusClass(v){return{OK:'status-ok',ALERTA:'status-alerta',CRITICO:'status-critico'}[v]||'status-ok'}
+function lotClass(v){return{DISPONIVEL:'status-ok',ESGOTADO:'status-esgotado',VENCIDO:'status-vencido'}[v]||'status-ok'}
+function beautifyType(v){return{INSUMO:'Insumo',PRONTO:'Produto pronto',APOIO:'Apoio/Limpeza'}[v]||v}
+function beautifyStatus(v){return{OK:'OK',ALERTA:'Atenção',CRITICO:'Crítico'}[v]||v}
+function beautifyLot(v){return{DISPONIVEL:'Disponível',ESGOTADO:'Esgotado',VENCIDO:'Vencido'}[v]||v}
+function fmtMoney(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v)}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const icons={success:'✅',warning:'⚠️',error:'❌'};const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${icons[type]}</span><span style="font-size:13px;font-weight:700">${msg}</span>`;c.appendChild(t);setTimeout(()=>t.remove(),3200)}
+document.addEventListener('DOMContentLoaded',init);
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+</script>
+</body>
+</html>

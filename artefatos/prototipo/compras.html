@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padaria - Compras</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#E8722A;--primary-dark:#C45D1E;--primary-light:#FCEEE4;--secondary:#2D6A4F;--secondary-light:#D8F3DC;--accent:#3A86FF;--accent-light:#E8F0FE;--danger:#E63946;--danger-light:#FFE0E3;--warning:#F4A261;--warning-light:#FFF3E0;--gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;--gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;--gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;--radius:12px;--radius-sm:8px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);--shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);--shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);--shadow-xl:0 20px 25px rgba(0,0,0,.1),0 10px 10px rgba(0,0,0,.04);--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;--transition:.2s ease}
+body{font-family:var(--font);background:var(--gray-100);color:var(--gray-800);line-height:1.45}
+.app{display:flex;min-height:100vh}.sidebar{width:72px;background:var(--gray-900);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;position:fixed;inset:0 auto 0 0;z-index:100;overflow-y:auto}.sidebar::-webkit-scrollbar{width:0}.sidebar-logo{width:44px;height:44px;background:var(--primary);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;cursor:pointer}.sidebar-item{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gray-400);cursor:pointer;transition:all var(--transition);position:relative}.sidebar-item:hover{background:var(--gray-700);color:#fff}.sidebar-item.active{background:var(--primary);color:#fff}.sidebar-item .tooltip{position:absolute;left:60px;background:var(--gray-800);color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity var(--transition)}.sidebar-item:hover .tooltip{opacity:1}.sidebar-divider{width:36px;height:1px;background:var(--gray-700);margin:6px 0}.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.main{margin-left:72px;flex:1;display:flex;flex-direction:column}.header{background:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:50}.header-title{font-size:18px;font-weight:800}.header-subtitle{font-size:13px;color:var(--gray-500)}.header-right{display:flex;gap:12px;align-items:center}.header-badge{padding:4px 12px;border-radius:999px;background:var(--primary-light);color:var(--primary);font-size:13px;font-weight:700}.header-user{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--secondary);color:#fff;font-weight:800}
+.content{padding:24px;flex:1}.hidden{display:none!important}.tabs-bar{display:flex;gap:4px;background:#fff;padding:4px;border-radius:var(--radius);margin-bottom:20px;box-shadow:var(--shadow);flex-wrap:wrap}.tab-btn{padding:10px 14px;border:none;border-radius:var(--radius-sm);background:transparent;font:700 13px var(--font);color:var(--gray-500);cursor:pointer;display:flex;gap:6px;align-items:center}.tab-btn:hover{background:var(--gray-100)}.tab-btn.active{background:var(--primary);color:#fff;box-shadow:var(--shadow-md)}.badge{padding:2px 8px;border-radius:999px;background:var(--gray-200);font-size:11px}.tab-btn.active .badge{background:rgba(255,255,255,.25)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}.stat-card,.table-card,.panel-card,.comparison-card,.report-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)}.stat-card{padding:16px;display:flex;align-items:center;gap:12px}.stat-icon{width:46px;height:46px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px}.stat-value{font-size:22px;font-weight:800}.stat-label{font-size:12px;color:var(--gray-500)}
+.layout-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}.table-header,.panel-header{padding:16px 20px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;gap:12px}.table-header h3,.panel-header h3{font-size:15px;font-weight:800}.toolbar,.table-actions,.inline-actions,.chip-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar{margin-bottom:16px}.search-input,.select-input,.form-input{padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius-sm);font:14px var(--font);outline:none;background:#fff}.search-input{flex:1;min-width:220px}.search-input:focus,.select-input:focus,.form-input:focus{border-color:var(--primary)}
+.btn{padding:10px 16px;border:none;border-radius:var(--radius-sm);font:700 13px var(--font);cursor:pointer;display:inline-flex;align-items:center;gap:6px}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}.btn-secondary{background:var(--secondary);color:#fff}.btn-outline{background:#fff;border:2px solid var(--gray-200);color:var(--gray-700)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}.btn-danger{background:var(--danger);color:#fff}.btn-sm{padding:6px 10px;font-size:12px}
+table{width:100%;border-collapse:collapse}th{padding:10px 16px;background:var(--gray-50);font-size:12px;text-transform:uppercase;color:var(--gray-500);text-align:left;border-bottom:1px solid var(--gray-200)}td{padding:12px 16px;border-bottom:1px solid var(--gray-100);font-size:14px;vertical-align:top}tr:hover{background:var(--gray-50)}
+.status-pill,.chip{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:5px}.chip{background:var(--gray-100);color:var(--gray-600)}.status-rascunho{background:var(--gray-200);color:var(--gray-700)}.status-enviado,.status-parcial{background:var(--accent-light);color:var(--accent)}.status-total,.status-aprovado{background:var(--secondary-light);color:var(--secondary)}.status-cancelado,.status-divergencia{background:var(--danger-light);color:var(--danger)}.status-alerta{background:var(--warning-light);color:var(--warning)}
+.comparison-grid,.price-grid,.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.comparison-card,.report-card{padding:16px}.comparison-card strong,.report-card strong{display:block;font-size:16px;margin-bottom:4px}.muted{font-size:12px;color:var(--gray-500)}.bar-chart{display:flex;align-items:flex-end;gap:10px;height:180px;margin-top:12px}.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}.bar{width:100%;max-width:42px;border-radius:8px 8px 0 0;background:var(--primary)}.bar.secondary{background:var(--accent)}.bar-label{font-size:11px;color:var(--gray-500);text-align:center}.bar-value{font-size:11px;font-weight:700}
+.checklist,.timeline{display:flex;flex-direction:column;gap:10px}.check-item,.timeline-item{padding:12px;border-radius:var(--radius-sm);background:var(--gray-50)}.check-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;align-items:center}.callout{padding:14px;border-radius:var(--radius-sm);background:var(--gray-50);font-size:13px;color:var(--gray-600);margin-bottom:16px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s}.modal-overlay.show{opacity:1;pointer-events:all}.modal{background:#fff;border-radius:var(--radius-lg);width:92%;max-width:760px;max-height:86vh;overflow:auto;box-shadow:var(--shadow-xl);transform:translateY(18px) scale(.96);transition:transform .3s}.modal-overlay.show .modal{transform:translateY(0) scale(1)}.modal-header{padding:20px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center}.modal-body{padding:20px 24px}.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px}.modal-close{width:32px;height:32px;border:none;background:var(--gray-100);border-radius:50%;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-group{margin-bottom:14px}.form-group label{display:block;font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:6px}
+.toast-container{position:fixed;top:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px}.toast{background:#fff;border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:280px;border-left:4px solid var(--secondary);animation:in .35s ease,out .35s ease 2.75s forwards}.toast.warning{border-left-color:var(--warning)}.toast.error{border-left-color:var(--danger)}@keyframes in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}@keyframes out{from{opacity:1}to{opacity:0;transform:translateX(40px)}}
+@media(max-width:900px){.stats-grid,.layout-grid,.comparison-grid,.price-grid,.report-grid,.form-row{grid-template-columns:1fr}.check-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.content{padding:16px}.header{padding:12px 16px}.stats-grid{grid-template-columns:1fr 1fr}.check-row{grid-template-columns:1fr}.toolbar{flex-direction:column}.search-input{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo" onclick="location.href='login-dashboard.html'">🍞</div>
+    <div class="sidebar-item" onclick="location.href='atendimento.html'">➕<span class="tooltip">Pedidos</span></div>
+    <div class="sidebar-item" onclick="location.href='caixa.html'">💰<span class="tooltip">Caixa</span></div>
+    <div class="sidebar-item" onclick="location.href='financeiro.html'">💵<span class="tooltip">Financeiro</span></div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="location.href='cadastros.html'">👥<span class="tooltip">Cadastros</span></div>
+    <div class="sidebar-item" onclick="location.href='estoque.html'">📦<span class="tooltip">Estoque</span></div>
+    <div class="sidebar-item active">🛒<span class="tooltip">Compras</span></div>
+    <div class="sidebar-item" onclick="location.href='producao.html'">🥣<span class="tooltip">Produção</span></div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-item" onclick="location.href='relatorios.html'">📊<span class="tooltip">Relatórios</span></div>
+      <div class="sidebar-item" onclick="location.href='configuracoes.html'">⚙️<span class="tooltip">Config</span></div>
+    </div>
+  </nav>
+  <div class="main">
+    <header class="header">
+      <div><div class="header-title">🛒 Compras e Fornecedores</div><div class="header-subtitle">Pedido de compra, recebimento, divergências, preços e comparação de fornecedores</div></div>
+      <div class="header-right"><span class="header-badge" id="dateBadge"></span><div class="header-user">AD</div></div>
+    </header>
+    <div class="content">
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="showTab('pedidos',event)">📋 Pedidos <span class="badge">6</span></button>
+        <button class="tab-btn" onclick="showTab('recebimento',event)">📦 Recebimento</button>
+        <button class="tab-btn" onclick="showTab('comparacao',event)">⚖️ Comparação</button>
+        <button class="tab-btn" onclick="showTab('precos',event)">📈 Preços</button>
+        <button class="tab-btn" onclick="showTab('relatorio',event)">🧾 Relatório</button>
+      </div>
+
+      <div id="tab-pedidos" class="tab-content">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--accent-light)">📤</div><div><div class="stat-value">4</div><div class="stat-label">Pedidos enviados</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning-light)">📦</div><div><div class="stat-value">2</div><div class="stat-label">Aguardando recebimento</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger-light)">⚠️</div><div><div class="stat-value">3</div><div class="stat-label">Com divergência</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--secondary-light)">💳</div><div><div class="stat-value">R$ 8.940</div><div class="stat-label">A pagar ao receber</div></div></div>
+        </div>
+        <div class="toolbar">
+          <input class="search-input" id="orderSearch" placeholder="Buscar por pedido, fornecedor ou item" oninput="renderOrders()">
+          <select class="select-input" id="orderStatus" onchange="renderOrders()"><option value="TODOS">Status: todos</option><option value="RASCUNHO">Rascunho</option><option value="ENVIADO">Enviado</option><option value="RECEBIDO_PARCIAL">Recebido parcial</option><option value="RECEBIDO_TOTAL">Recebido total</option><option value="CANCELADO">Cancelado</option></select>
+          <button class="btn btn-outline" onclick="showToast('📥 Sugestão do M03 carregada para novo pedido')">Importar M03</button>
+          <button class="btn btn-primary" onclick="openModal('modal-pedido')">+ Novo Pedido</button>
+        </div>
+        <div class="layout-grid">
+          <div class="table-card">
+            <div class="table-header"><h3>📋 Pedidos de compra</h3><div class="table-actions"><button class="btn btn-outline btn-sm" onclick="showToast('✅ Pedido #CMP-108 reenviado ao fornecedor')">Reenviar</button></div></div>
+            <table>
+              <thead><tr><th>Nº</th><th>Fornecedor</th><th>Data</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="ordersTable"></tbody>
+            </table>
+          </div>
+          <div class="panel-card">
+            <div class="panel-header"><h3>🔄 Ciclo do pedido</h3></div>
+            <div class="modal-body"><div class="timeline" id="cyclePanel"></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="tab-recebimento" class="tab-content hidden">
+        <div class="layout-grid">
+          <div class="table-card">
+            <div class="table-header"><h3>📦 Conferência de recebimento</h3><div class="table-actions"><button class="btn btn-primary btn-sm" onclick="openModal('modal-recebimento')">Confirmar recebimento</button></div></div>
+            <div class="modal-body"><div class="checklist" id="receivingList"></div></div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-header"><h3>🚨 Divergências encontradas</h3></div>
+            <div class="modal-body"><div class="timeline" id="divergencePanel"></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="tab-comparacao" class="tab-content hidden">
+        <div class="comparison-grid" id="comparisonGrid"></div>
+      </div>
+      <div id="tab-precos" class="tab-content hidden">
+        <div class="price-grid">
+          <div class="panel-card">
+            <div class="panel-header"><h3>📈 Evolução de preço - Farinha</h3></div>
+            <div class="modal-body"><div class="bar-chart" id="priceChart"></div></div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-header"><h3>📌 Últimos preços praticados</h3></div>
+            <div class="modal-body"><div class="timeline" id="priceTimeline"></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="tab-relatorio" class="tab-content hidden">
+        <div class="report-grid">
+          <div class="report-card"><strong>Compras no mês</strong><div class="muted">27 pedidos • 9 fornecedores • ticket médio R$ 1.240</div><div style="margin-top:10px;font-size:28px;font-weight:800;color:var(--primary)">R$ 33.480</div></div>
+          <div class="report-card"><strong>Melhor fornecedor</strong><div class="muted">Menor preço médio + melhor prazo</div><div style="margin-top:10px;font-size:24px;font-weight:800">Moinho Real</div></div>
+          <div class="report-card"><strong>Maior oscilação de preço</strong><div class="muted">Últimos 6 meses</div><div style="margin-top:10px;font-size:24px;font-weight:800;color:var(--danger)">Queijo Muçarela +12,8%</div></div>
+          <div class="report-card"><strong>Integrações geradas</strong><div class="muted">Recebimentos viram entradas no M03 e contas no M08</div><div style="margin-top:10px" class="chip-row"><span class="chip">11 entradas criadas</span><span class="chip">6 contas a pagar</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-pedido"><div class="modal"><div class="modal-header"><h2>➕ Novo pedido de compra</h2><button class="modal-close" onclick="closeModal('modal-pedido')">✕</button></div><div class="modal-body"><div class="callout">Itens podem vir da sugestão do M03 com último preço, fornecedor preferencial e previsão de falta.</div><div class="form-row"><div class="form-group"><label>Fornecedor</label><select class="form-input"><option>Moinho Real</option><option>Laticínios São João</option><option>Embalagens Prime</option></select></div><div class="form-group"><label>Previsão de entrega</label><input class="form-input" type="date"></div></div><div class="form-row"><div class="form-group"><label>Condição de pagamento</label><select class="form-input"><option>Boleto 15 dias</option><option>À vista</option><option>30 dias</option></select></div><div class="form-group"><label>Status inicial</label><select class="form-input"><option>RASCUNHO</option><option>ENVIADO</option></select></div></div><div class="form-group"><label>Observação</label><input class="form-input" placeholder="Observações do pedido"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-pedido')">Cancelar</button><button class="btn btn-primary" onclick="saveOrder()">Salvar pedido</button></div></div></div>
+<div class="modal-overlay" id="modal-recebimento"><div class="modal"><div class="modal-header"><h2>📦 Confirmar recebimento</h2><button class="modal-close" onclick="closeModal('modal-recebimento')">✕</button></div><div class="modal-body"><div class="callout">Ao confirmar, o sistema cria entradas no estoque, registra o preço de compra e gera conta a pagar automaticamente.</div><div class="checklist"><div class="check-item"><div class="check-row"><div><strong>Farinha de Trigo Especial 50kg</strong><div class="muted">Pedido 12 sacos</div></div><input class="form-input" value="12"><input class="form-input" placeholder="Lote"><input class="form-input" type="date"></div></div><div class="check-item"><div class="check-row"><div><strong>Queijo Muçarela</strong><div class="muted">Pedido 18 kg</div></div><input class="form-input" value="16"><input class="form-input" placeholder="Divergência"><input class="form-input" type="date"></div></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-recebimento')">Cancelar</button><button class="btn btn-primary" onclick="confirmReceiving()">Confirmar</button></div></div></div>
+<div class="modal-overlay" id="modal-cancelar"><div class="modal"><div class="modal-header"><h2>🚫 Cancelar pedido</h2><button class="modal-close" onclick="closeModal('modal-cancelar')">✕</button></div><div class="modal-body"><div class="callout">Pedidos enviados exigem motivo obrigatório para cancelamento.</div><div class="form-group"><label>Motivo</label><input class="form-input" placeholder="Descreva o motivo do cancelamento"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-cancelar')">Voltar</button><button class="btn btn-danger" onclick="cancelOrder()">Cancelar pedido</button></div></div></div>
+
+<div class="toast-container" id="toast-container"></div>
+<script>
+const orders=[{n:'CMP-108',forn:'Moinho Real',data:'31/03',valor:2016,status:'ENVIADO',itens:'Farinha, fermento'},{n:'CMP-107',forn:'Laticínios São João',data:'30/03',valor:682.2,status:'RECEBIDO_PARCIAL',itens:'Queijo, manteiga'},{n:'CMP-106',forn:'Embalagens Prime',data:'29/03',valor:488,status:'RECEBIDO_TOTAL',itens:'Sacolas, potes'},{n:'CMP-105',forn:'Horti Serra',data:'29/03',valor:94,status:'CANCELADO',itens:'Alface, tomate'},{n:'CMP-104',forn:'Moinho Real',data:'28/03',valor:1650,status:'RASCUNHO',itens:'Farinha integral'}];
+const receiving=[['CMP-108','Farinha de Trigo Especial 50kg','12 sacos','12 sacos','OK','Validade 18/04/2026'],['CMP-107','Queijo Muçarela','18 kg','16 kg','DIVERGENCIA','2 kg faltantes'],['CMP-107','Manteiga Extra','6 kg','6 kg','OK','Validade 12/04/2026'],['CMP-105','Alface Crespa','15 maços','12 maços','DIVERGENCIA','Validade curta (1 dia)']];
+const comparisons=[{item:'Farinha de Trigo Especial 50kg',cards:[['Moinho Real','R$ 168,00','2 dias','★★★★★'],['Grãos do Vale','R$ 172,50','3 dias','★★★★☆'],['Atacado Central','R$ 176,40','1 dia','★★★☆☆']]},{item:'Queijo Muçarela',cards:[['Laticínios São João','R$ 37,90/kg','1 dia','★★★★☆'],['Minas Frios','R$ 39,20/kg','2 dias','★★★★★'],['Distribuidora Sul','R$ 41,00/kg','3 dias','★★★☆☆']]}];
+const priceBars=[['Out',150],['Nov',154],['Dez',158],['Jan',161],['Fev',164],['Mar',168]];
+const priceHistory=[['31/03','Moinho Real','Farinha 50kg','R$ 168,00','CMP-108'],['24/03','Moinho Real','Farinha 50kg','R$ 165,00','CMP-099'],['18/03','Grãos do Vale','Farinha 50kg','R$ 172,50','CMP-091'],['30/03','Laticínios São João','Queijo Muçarela','R$ 37,90/kg','CMP-107'],['20/03','Laticínios São João','Manteiga Extra','R$ 19,80/kg','CMP-093']];
+let cancelTarget='CMP-105';
+
+function init(){document.getElementById('dateBadge').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'});renderOrders();renderReceiving();renderComparison();renderPrices();renderCycle()}
+function showTab(tab,event){document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));document.getElementById('tab-'+tab).classList.remove('hidden');document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));event.currentTarget.classList.add('active')}
+function renderOrders(){const term=document.getElementById('orderSearch').value.toLowerCase(),status=document.getElementById('orderStatus').value;const filtered=orders.filter(o=>(!term||`${o.n} ${o.forn} ${o.itens}`.toLowerCase().includes(term))&&(status==='TODOS'||o.status===status));document.getElementById('ordersTable').innerHTML=filtered.map(o=>`<tr><td><strong>${o.n}</strong><div class="muted">${o.itens}</div></td><td>${o.forn}</td><td>${o.data}</td><td>${fmtMoney(o.valor)}</td><td><span class="status-pill ${orderClass(o.status)}">${beautifyStatus(o.status)}</span></td><td><div class="inline-actions">${o.status==='ENVIADO'||o.status==='RECEBIDO_PARCIAL'?`<button class="btn btn-sm btn-secondary" onclick="openModal('modal-recebimento')">Receber</button>`:''}<button class="btn btn-sm btn-outline" onclick="showToast('📌 ${o.n} aberto para consulta')">Ver</button>${o.status==='ENVIADO'?`<button class="btn btn-sm btn-danger" onclick="cancelTarget='${o.n}';openModal('modal-cancelar')">Cancelar</button>`:''}</div></td></tr>`).join('')}
+function renderCycle(){document.getElementById('cyclePanel').innerHTML=[['Rascunho','Pedido ainda pode ser editado livremente.'],['Enviado','Itens travados e aguardando fornecedor.'],['Recebido parcial','Parte recebida, restante pendente.'],['Recebido total','Recebimento concluído com estoque + financeiro integrados.'],['Cancelado','Estado terminal com motivo obrigatório.']].map(c=>`<div class="timeline-item"><strong>${c[0]}</strong><div class="muted">${c[1]}</div></div>`).join('')}
+function renderReceiving(){document.getElementById('receivingList').innerHTML=receiving.map(r=>`<div class="check-item"><div class="check-row"><div><strong>${r[1]}</strong><div class="muted">${r[0]} • Pedido ${r[2]} • Recebido ${r[3]}</div></div><span class="chip">${r[4]==='OK'?'Sem divergência':'Com divergência'}</span><span class="status-pill ${r[4]==='OK'?'status-total':'status-divergencia'}">${r[4]==='OK'?'OK':'Divergência'}</span><button class="btn btn-sm btn-outline" onclick="showToast('📦 Lote e validade registrados para ${r[1]}')">Conferir</button></div></div>`).join('');document.getElementById('divergencePanel').innerHTML=receiving.filter(r=>r[4]==='DIVERGENCIA').map(r=>`<div class="timeline-item"><strong>${r[1]}</strong><div class="muted">${r[5]} • pedido ${r[0]}</div><div class="chip-row" style="margin-top:8px"><span class="status-pill status-divergencia">Registrar obrigatório</span></div></div>`).join('')}
+function renderComparison(){document.getElementById('comparisonGrid').innerHTML=comparisons.map(c=>`<div class="comparison-card"><strong>${c.item}</strong><div class="muted">Comparativo por último preço, prazo e avaliação</div><div class="timeline" style="margin-top:12px">${c.cards.map(k=>`<div class="timeline-item"><strong>${k[0]}</strong><div class="muted">${k[1]} • prazo ${k[2]} • ${k[3]}</div></div>`).join('')}</div></div>`).join('')}
+function renderPrices(){const max=Math.max(...priceBars.map(p=>p[1]));document.getElementById('priceChart').innerHTML=priceBars.map((p,i)=>`<div class="bar-col"><div class="bar ${i%2?'secondary':''}" style="height:${(p[1]/max)*140}px"></div><div class="bar-value">${fmtMoney(p[1]).replace(',00','')}</div><div class="bar-label">${p[0]}</div></div>`).join('');document.getElementById('priceTimeline').innerHTML=priceHistory.map(p=>`<div class="timeline-item"><strong>${p[2]}</strong><div class="muted">${p[0]} • ${p[1]} • ${p[3]} • ${p[4]}</div></div>`).join('')}
+function orderClass(v){return{RASCUNHO:'status-rascunho',ENVIADO:'status-enviado',RECEBIDO_PARCIAL:'status-parcial',RECEBIDO_TOTAL:'status-total',CANCELADO:'status-cancelado'}[v]||'status-rascunho'}
+function beautifyStatus(v){return{RASCUNHO:'Rascunho',ENVIADO:'Enviado',RECEBIDO_PARCIAL:'Recebido parcial',RECEBIDO_TOTAL:'Recebido total',CANCELADO:'Cancelado'}[v]||v}
+function fmtMoney(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v)}
+function saveOrder(){closeModal('modal-pedido');showToast('✅ Pedido salvo e pronto para envio ao fornecedor')}
+function confirmReceiving(){closeModal('modal-recebimento');showToast('📦 Recebimento confirmado com integração para M03 e M08')}
+function cancelOrder(){closeModal('modal-cancelar');showToast(`🚫 ${cancelTarget} cancelado com motivo registrado`,'warning')}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function showToast(msg,type='success'){const c=document.getElementById('toast-container');const icons={success:'✅',warning:'⚠️',error:'❌'};const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${icons[type]}</span><span style="font-size:13px;font-weight:700">${msg}</span>`;c.appendChild(t);setTimeout(()=>t.remove(),3200)}
+document.addEventListener('DOMContentLoaded',init);
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+</script>
+</body>
+</html>
